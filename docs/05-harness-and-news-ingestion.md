@@ -21,7 +21,7 @@ for two reasons:
 ## 2. Source Registry (config-driven, not hardcoded)
 
 Source credibility is **data**, not code. Store it as a table (see
-`02-database-schema.md`, `sources`), not as a Python dict baked into a deploy.
+`07-database-schema.md`, `sources`), not as a Python dict baked into a deploy.
 
 | Tier | Examples | Weight in aggregation |
 |---|---|---|
@@ -170,4 +170,4 @@ Enforce a **budget per investigation**, not just per user:
   `UNCLEAR — investigation incomplete`, never silently retry indefinitely.
 
 Combine this with per-user daily quotas (tracked in `users.daily_quota_used`,
-see `02-database-schema.md`) to prevent abuse from burning the shared budget.
+see `07-database-schema.md`) to prevent abuse from burning the shared budget.

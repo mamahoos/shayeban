@@ -106,7 +106,7 @@ erDiagram
 ### `claim_clusters`
 The center of the schema. `embedding` (via pgvector) is what powers both the
 dedup/cache lookup and the volatility velocity counters described in
-`01-harness-and-news-ingestion.md`. `breaking_mode`, `velocity_15m`, and
+`05-harness-and-news-ingestion.md`. `breaking_mode`, `velocity_15m`, and
 `velocity_1h` are denormalized onto this table deliberately — they are read on
 almost every request to this cluster, so keeping them as columns (updated by
 the ingestion job) avoids recomputing them from raw `evidence` rows on every
