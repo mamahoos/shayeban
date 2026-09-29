@@ -7,9 +7,9 @@
 
 The original spec proposed "SQLite → PostgreSQL" as a later migration. This
 doc recommends starting on Postgres with the `pgvector` extension
-**immediately**, for one concrete reason: the dedup/cache layer (the
-highest-leverage piece of the whole architecture — see the main architecture
-doc) requires vector similarity search over claim embeddings. SQLite has no
+**immediately**, for one concrete reason: the dedup/cache path (the
+highest-leverage piece of the whole architecture — see
+`03-investigation-lifecycle.md` §4) requires vector similarity search over claim embeddings. SQLite has no
 native vector index. Migrating a growing `claims` table from SQLite to
 Postgres later is realistic; migrating it to also grow a vector index at the
 same time is unnecessary extra work when Postgres does both from the start,
@@ -125,8 +125,8 @@ a periodic manual audit — source reputation is not static.
 
 ### `evidence`
 `stance` (`support` / `contradict` / `irrelevant`) and `laya_confidence` are
-filled in by the **per-evidence Laya pass** described in the main
-architecture doc (Layer 6, step 1) — not by the harness itself. The harness
+filled in by the **per-evidence Laya pass** (`LAYA_ANALYSIS`, layer 7 —
+see `04-fsm.md` and `06-laya.md`) — not by the harness itself. The harness
 only populates everything up through `fetched_at`; the decision layer writes
 `stance` and `laya_confidence` back onto the same row.
 
@@ -143,7 +143,24 @@ issued during a fast-moving situation is visibly flagged as such even after
 Backs the "human review for difficult cases" V2 feature. `reviewed = false`
 rows are the review queue.
 
-## 4. Indexing Strategy
+## 4. MVP deltas (FSM state, provenance, versioning)
+
+The base schema above was written before the current doc set; four additions
+are required by it and belong in the first migration:
+
+| Table | Column(s) | Why |
+|---|---|---|
+| `investigations` | `state text not null`, `state_updated_at timestamptz`, `attempts int default 0` | the FSM must survive restarts — `investigations.state` is the single current-state column (`04-fsm.md`); transition *history* lives in structured logs, not a table |
+| `investigations` | `laya_checkpoint text`, `laya_version text`, `question_schema_version text` | every verdict records what produced it (`06-laya.md` §5, `10-devops-mlops.md` §5) |
+| `evidence` | `derived_count int default 1` | output of the independence gate: how many copies this representative stands for — copies inform virality, never weight (`08-evidence-and-source-weighting.md` §3.1) |
+| `investigations` | `strength` already exists; add `verdict_extras jsonb` only if the final pass grows extra fields | keep the log forward-compatible without ALTERing on every schema tweak |
+
+Deliberately **not** added: denormalized occurrence/unique-user counters on
+`claim_clusters` (cheap to compute from `claims` at MVP volumes — denormalize
+only when measured hot), and any weights/reputation history tables
+(`08-…` §5, deferred with the feedback loop).
+
+## 5. Indexing Strategy
 
 ```sql
 -- Vector similarity search for dedup + clustering
@@ -160,6 +177,10 @@ CREATE INDEX ON investigations (cluster_id, created_at DESC);
 
 -- Pending human review queue
 CREATE INDEX ON feedback (reviewed) WHERE reviewed = false;
+
+-- Restart sweep: investigations not in a terminal state
+CREATE INDEX ON investigations (state_updated_at)
+    WHERE state NOT IN ('COMPLETED', 'REJECTED', 'FAILED', 'NEEDS_REVIEW');
 ```
 
 The `ivfflat` index requires an approximate row-count estimate to tune
