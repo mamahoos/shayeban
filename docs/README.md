@@ -1,0 +1,36 @@
+# Shayeban Architecture Documentation
+
+Architecture docs for **Shayeban**, a Telegram-based claim/news fact-checking
+system. The set describes the **desired MVP architecture**, is explicit about
+what exists today, and marks every deliberate deferral.
+
+> Status: documentation phase. The repository contains **no application code
+> yet** — see `architecture-gap-analysis.md` for current-vs-desired.
+
+## Reading order
+
+| # | Doc | Covers |
+|---|---|---|
+| 00 | `00-system-overview.md` | Product surfaces, conceptual layer map (the numbering all docs reference), glossary |
+| 01 | `01-architecture.md` | MVP shape: modular monolith, module map, boundaries, process/deploy shape |
+| 02 | `02-components.md` | Component catalog, data contracts, dependency rules |
+| 03 | `03-investigation-lifecycle.md` | End-to-end lifecycle, data flow, cache path, failure branches |
+| 04 | `04-fsm.md` | Investigation state machine: states, transitions, invariants, restart policy |
+| 05 | `05-harness-and-news-ingestion.md` | Harness: ingestion pipeline, source tiers, clustering, volatility/breaking mode, budgets |
+| 06 | `06-laya.md` | Laya: what it is, the three passes, serving modes, versioning |
+| 07 | `07-database-schema.md` | Postgres + pgvector schema, table notes, MVP deltas, indexing |
+| 08 | `08-evidence-and-source-weighting.md` | Independence gate, tier weights, roll-up rules, virality invariants |
+| 09 | `09-observability.md` | Day-one structured log fields, health, growth path |
+| 10 | `10-devops-mlops.md` | Local-first deploy, CI gates, model/prompt versioning, evaluation |
+| 11 | `11-security-boundaries.md` | Trust boundaries (web, Telegram, internal), secrets, deferred hardening |
+| 12 | `12-future-evolution.md` | Deferred capabilities, extension points, evidence-based split triggers, open questions |
+| — | `architecture-gap-analysis.md` | Current → Desired MVP → Gap → Why it matters |
+
+## Provenance
+
+| Doc | Origin |
+|---|---|
+| `05-…` | Renumbered from the original `01-harness-and-news-ingestion.md` |
+| `07-…` | Renumbered from the original `02-database-schema.md`, plus §4 MVP deltas |
+| `01-…`, `09-…`, `10-…` | Absorb the former `03-microservices-architecture.md` (monolith decision, module boundaries → 01; observability → 09; deployment → 10), which was then removed |
+| all others | New in this doc set |

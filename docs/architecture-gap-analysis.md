@@ -1,0 +1,31 @@
+# Architecture Gap Analysis
+
+Current state of the repository vs. the desired MVP architecture described in
+this doc set. **A record, not a backlog** — no item here is a task yet; gaps
+are grouped only for readability. "Current" means what exists in the repo
+today, not what another repo prototypes.
+
+| Current | Desired MVP | Gap | Why it matters |
+|---|---|---|---|
+| Architecture docs referenced a missing "main architecture doc" (layers, cache) | Unified doc set (`00`–`12`) with one layer numbering | *(closed by this doc set)* — old dangling references rewritten | The team had three good deep-dives but no common map; layer references pointed nowhere |
+| **No application code at all** — no `pyproject.toml`, package, tests, or README | Modular monolith skeleton per `01-architecture.md` §2 with the ten modules | Entire implementation surface | Every design claim below is untested against reality; the demo doesn't exist |
+| No Telegram integration | `bot_gateway`: inline queries **and** group updates, one delivery abstraction (reply / inline answer / edit-later) | No bot, no handlers, no delivery path | Both product surfaces are missing; delivery pattern also has an open Telegram question (Q1) |
+| No claim pipeline | `claim_extraction`: Laya detection + canonical claim + bilingual (fa/en) queries | Detection/extraction unimplemented; **generative model for query-gen undecided (Q2)** | Garbage queries → weak evidence → weak verdicts; the biggest undecided dependency in the system |
+| No investigation lifecycle | Explicit FSM (`04-fsm.md`) with persisted `investigations.state`, retries, budgets, checkpoints | No state machine, no orchestration module, no state column | Restarts lose work; retries/budgets have no owner; pipeline logic would scatter into handlers |
+| Harness fully designed in `05-…`, zero code | Search → URL dedup → fetch → extract → tier → cluster → volatility, per-investigation budget | No implementation, no search provider chosen (Q3), no fetch/extract code | The system's core value (touching the outside world) doesn't exist; untrusted-content boundary unenforced |
+| Clustering/dedup designed (pgvector), no code | Embedding match → cluster attach/create → cache TTL path incl. breaking-mode collapse | No migrations, no embeddings, no cache logic | Without dedup: repeated cost per repeat claim and no virality/breaking signal |
+| Evidence boundary stated as a principle only | Typed `EvidencePackage` contract; raw HTML never crosses layer 5→6 | No contract types; no sanitizer | Prompt-injection and content-leak defenses are exactly this boundary; principles without types erode |
+| Laya proven in `laya-lab` (typed adapter, `FakeRunner` tests), separate repo | `decision/` port inside shayeban: three passes (detection, stance, verdict) + recorded checkpoint/schema version | Adapter not integrated; version fields missing on `investigations` | Model calls would scatter across call sites; verdicts not reproducible/auditable |
+| Source tier table designed (`05-…` §2, `sources` rows) | `weighting/`: independence gate → tier × confidence × recency → roll-up | No module; **copied-source detection undesigned** | Copies counted as corroboration directly produces confident wrong verdicts — invariant #2 unenforced |
+| Aggregation rules described narratively (thresholds, breaking bars) | Config-driven threshold rules + `VerdictCandidate`, unit-tested pure functions | No rule engine/config, no tests | Verdict quality unmeasurable; tuning impossible without redeploys |
+| `validation/` named in module list only | Rule guard constraining the final pass (independence floors, tier floors, breaking constraints) | Rules unspecified, unimplemented | Laya output would be trusted unchecked — the guard that keeps `TRUE` from resting on thin evidence |
+| `explanation/` named only | Template builder producing verdict text + citations | No templates | No user-facing artifact; explanations would drift to unaudit-able generated prose |
+| Schema designed in `07-…` (7 tables), no database | Postgres + pgvector, Alembic migrations, MVP deltas: `state`, version columns, `derived_count` | No DB, no migrations, delta columns absent | FSM persistence and versioned verdicts are impossible without the delta columns |
+| `feedback` table designed | Review queue workflow (`reviewed = false`) minimally surfaced | No flow, no consumer | No path from human judgment to future reputation learning |
+| Observability: 4 log fields listed (former `03-…` §5) | Structured JSON logs with correlation, cost, cache, timings, Laya, outcomes; `/health` | No logging convention, no fields, no health endpoint | Every later scaling/split decision is supposed to be evidence-based; without fields there is no evidence |
+| CI: Telegram notify workflow only | GitHub Actions gates: lint, strict mypy, tests (pure-logic + fake-runner contracts), image build | No code CI at all | 5-person team + agents: quality bar must be enforced mechanically, not by review luck |
+| Laya informally pinned in `laya-lab` venv | Lockfile + HF revision pins; per-investigation version recording; golden eval set + runner | No eval set, no pins, no runner, no runner decision (Q7) | Silent quality drift when models/schemas/thresholds change — the main MLOps risk at this scale |
+| No config/secrets convention (no `.env`, no `.gitignore`) | `.env.example` + git-ignored `.env`, typed settings, GitHub secrets | Convention absent; `repomix-output.xml` already sitting untracked at repo root | Tokens get committed by accident; environments diverge between the 5 laptops |
+| Security principles in `05-…`/`11-…` | Enforced at three boundaries: web sanitizer, gateway validation + quotas, internal-only DB/model with bearer | Nothing enforced in code | Boundaries erode first under deadline pressure if they exist only as prose |
+| No deployment artifact | Local `docker compose`: `app` + `postgres` (+ later `laya-service`) | No compose, no Dockerfile | Nothing to demo; "it runs on my machine" unverifiable by teammates |
+| Product defines inline **and** group surfaces | Both funnel into one pipeline (group gate → FSM) | Pipeline entry abstraction not designed beyond `03-…` §1 | Two ad-hoc entry paths would fork the architecture where it should converge |
