@@ -151,7 +151,7 @@ are required by it and belong in the first migration:
 | Table | Column(s) | Why |
 |---|---|---|
 | `investigations` | `state text not null`, `state_updated_at timestamptz`, `attempts int default 0` | the FSM must survive restarts — `investigations.state` is the single current-state column (`04-fsm.md`); transition *history* lives in structured logs, not a table |
-| `investigations` | `laya_checkpoint text`, `laya_version text`, `question_schema_version text` | every verdict records what produced it (`06-laya.md` §5, `10-devops-mlops.md` §5) |
+| `investigations` | `laya_checkpoint text`, `laya_version text`, `question_schema_version text` | every verdict records what produced it (`06-laya.md` §5, `mlops.md` §3) |
 | `evidence` | `derived_count int default 1` | output of the independence gate: how many copies this representative stands for — copies inform virality, never weight (`08-evidence-and-source-weighting.md` §3.1) |
 | `investigations` | `strength` already exists; add `verdict_extras jsonb` only if the final pass grows extra fields | keep the log forward-compatible without ALTERing on every schema tweak |
 

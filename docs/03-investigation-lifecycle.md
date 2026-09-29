@@ -30,7 +30,7 @@ flowchart TD
 
 - **Inline**: the query text is the claim; no group membership required.
   Whether the surface supports "ack now, edit later" is an open Telegram
-  question (`12-future-evolution.md` Q1) — either way the investigation
+  question (`future-evolution.md` Q1) — either way the investigation
   itself is identical.
 - **Group**: the message goes through claim detection (a Laya pass via
   `decision`) *before* an investigation is created; non-claims never enter
@@ -124,7 +124,7 @@ investigation history, while every occurrence still updates virality counters
 
 `UNCLEAR` is an answer; `FAILED` is an operational error. Keeping them
 distinct is what lets observability separate "the world is ambiguous" from
-"our pipeline is broken" (`09-observability.md`).
+"our pipeline is broken" (`observability.md`).
 
 ## 6. Delivery
 

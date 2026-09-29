@@ -49,7 +49,7 @@ becomes instructions, `Options()`/`Levels()` give per-option wording. Free-text
 fields are rejected by design.
 
 **These question schemas are our prompts.** They are code, reviewed in git,
-and versioned per investigation (`10-devops-mlops.md`).
+and versioned per investigation (`mlops.md`).
 
 ## 3. What Laya does *not* do
 
@@ -69,7 +69,7 @@ without touching retrieval, weighting math, or delivery.
 | Mode | When | How |
 |---|---|---|
 | **In-process (MVP)** | default | `decision/` constructs the runner behind the `PredictRunner` protocol (`laya-lab/laya_typed.py`); `LayaAsker(runner)` is already transport-agnostic |
-| **Separate `laya-service`** | when measured pain appears: restart cost of weight-loading, GPU contention (see `09-observability.md` stage timings) | upstream `laya.serve` ships an HTTP surface: `POST /v1/systemone`, bearer auth (`LAYA_API_KEY`), `/health`, env-var config (`LAYA_DEVICE`, `LAYA_PRELOAD`, `LAYA_MODELS`, …). Verify the wire protocol against our client before committing — otherwise a thin wrapper we own |
+| **Separate `laya-service`** | when measured pain appears: restart cost of weight-loading, GPU contention (see `observability.md` stage timings) | upstream `laya.serve` ships an HTTP surface: `POST /v1/systemone`, bearer auth (`LAYA_API_KEY`), `/health`, env-var config (`LAYA_DEVICE`, `LAYA_PRELOAD`, `LAYA_MODELS`, …). Verify the wire protocol against our client before committing — otherwise a thin wrapper we own |
 
 The split is a constructor swap because every call already flows through one
 module (`01-architecture.md` §4.2). Requirements for either mode: model
@@ -94,6 +94,6 @@ source of truth — investigations are logs, not re-runnable functions.
 ## 6. Observability hooks
 
 The package exposes hooks (`HookRegistry`, usage aggregation) around
-`decide()`; `09-observability.md` uses them (or wrapper logging) to record
+`decide()`; `observability.md` uses them (or wrapper logging) to record
 per-pass latency, checkpoint used, and state size. Errors here are retryable
 (`RETRYING` in `04-fsm.md`), never silent.

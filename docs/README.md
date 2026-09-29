@@ -20,11 +20,19 @@ what exists today, and marks every deliberate deferral.
 | 06 | `06-laya.md` | Laya: what it is, the three passes, serving modes, versioning |
 | 07 | `07-database-schema.md` | Postgres + pgvector schema, table notes, MVP deltas, indexing |
 | 08 | `08-evidence-and-source-weighting.md` | Independence gate, tier weights, roll-up rules, virality invariants |
-| 09 | `09-observability.md` | Day-one structured log fields, health, growth path |
-| 10 | `10-devops-mlops.md` | Local-first deploy, CI gates, model/prompt versioning, evaluation |
-| 11 | `11-security-boundaries.md` | Trust boundaries (web, Telegram, internal), secrets, deferred hardening |
-| 12 | `12-future-evolution.md` | Deferred capabilities, extension points, evidence-based split triggers, open questions |
 | — | `architecture-gap-analysis.md` | Current → Desired MVP → Gap → Why it matters |
+
+**Part 2 — engineering (DevOps/MLOps phase)**
+
+| Doc | Covers |
+|---|---|
+| `devops.md` | Toolchain, local workflow, the smallest useful CI gate, secrets in CI |
+| `deployment.md` | Compose topology: containers, networks, volumes, health, migrations, dev workflow |
+| `mlops.md` | Model/prompt/embedding/config versioning, provenance, change management |
+| `evaluation.md` | Eval targets, golden dataset design, runner, growth path |
+| `observability.md` | Structured log fields, investigation inspection, health, growth path |
+| `security.md` | Trust boundaries, input threats, secrets, Docker/Actions hardening |
+| `future-evolution.md` | MVP → Future → Trigger per subsystem, extension points, open questions |
 
 ## Provenance
 
@@ -32,5 +40,7 @@ what exists today, and marks every deliberate deferral.
 |---|---|
 | `05-…` | Renumbered from the original `01-harness-and-news-ingestion.md` |
 | `07-…` | Renumbered from the original `02-database-schema.md`, plus §4 MVP deltas |
-| `01-…`, `09-…`, `10-…` | Absorb the former `03-microservices-architecture.md` (monolith decision, module boundaries → 01; observability → 09; deployment → 10), which was then removed |
-| all others | New in this doc set |
+| `01-…`, `observability.md`, `deployment.md` | Absorb the former `03-microservices-architecture.md` (monolith decision, module boundaries → 01; observability → observability.md; deployment → deployment.md), which was then removed |
+| `devops.md`, `mlops.md`, `evaluation.md` | Split out of and supersedes the intermediate `10-devops-mlops.md` |
+| `observability.md`, `security.md`, `future-evolution.md` | Renamed from the first-pass `09-…`, `11-…`, `12-…` and expanded for the DevOps/MLOps phase |
+| `00`–`04`, `06`, `08`, gap analysis | New in this doc set |

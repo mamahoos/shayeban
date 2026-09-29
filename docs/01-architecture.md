@@ -9,7 +9,7 @@
 For the MVP, Shayeban is **one deployable Python service** with clear internal
 module boundaries — not microservices. (This continues the decision recorded
 in the former `03-microservices-architecture.md`, whose content now lives
-here, in `09-observability.md`, and in `10-devops-mlops.md`.)
+here, in `observability.md`, and in `mlops.md`.)
 
 Why:
 
@@ -62,7 +62,7 @@ Everything else (`bot_gateway`, `claim_extraction`, `harness`, `validation`,
 
 | Boundary | Where | What it guarantees |
 |---|---|---|
-| Untrusted web ↔ internal reasoning | `harness/` → structured evidence | Sanitization, tiering, and prompt-injection defenses live in one auditable place (`05-harness-and-news-ingestion.md`, `11-security-boundaries.md`). |
+| Untrusted web ↔ internal reasoning | `harness/` → structured evidence | Sanitization, tiering, and prompt-injection defenses live in one auditable place (`05-harness-and-news-ingestion.md`, `security.md`). |
 | Telegram I/O ↔ domain logic | `bot_gateway/` | Handlers translate updates into `ClaimInput`; no fact-check logic in aiogram code. |
 | Laya ↔ everything else | `decision/` | All model traffic behind one module — the seam for in-process → HTTP swap (`06-laya.md`). |
 | Logic ↔ storage | `persistence/` | Repositories, not ad-hoc SQL scattered through modules. |
@@ -76,7 +76,7 @@ Everything else (`bot_gateway`, `claim_extraction`, `harness`, `validation`,
 | Weighting/aggregation vs. Laya | model and math entangled; can't tune weights or test aggregation without the model | `weighting/` (`08-evidence-and-source-weighting.md`) |
 | Generative-model port for extraction/query-gen | an (as yet undecided) LLM baked directly into call sites | `claim_extraction/` (open question, see gap analysis) |
 | Delivery abstraction (reply vs. inline answer vs. edit-later) | surface-specific code leaks into the pipeline | `bot_gateway/` (`03-investigation-lifecycle.md`) |
-| Config/secrets boundary | tokens and keys hard-coded per environment | a dedicated settings module (`10-devops-mlops.md` §3) |
+| Config/secrets boundary | tokens and keys hard-coded per environment | a dedicated settings module (`deployment.md` §5) |
 
 ## 4. Process & deploy shape
 
@@ -115,7 +115,7 @@ Deliberately **not** in the MVP: Redis, background workers, a message queue,
 Kubernetes, any cloud service. `async`/`await` inside the single `app`
 process runs searches/fetches concurrently without blocking the bot; a real
 queue earns its complexity only once a single process provably can't keep up
-— an evidence-based decision, not a guess (`09-observability.md` exists to
+— an evidence-based decision, not a guess (`observability.md` exists to
 produce that evidence).
 
 ### 4.2 Laya: in-process now, a service when justified
@@ -133,11 +133,11 @@ Resolution for the MVP:
    constructor choice, not
    a code change — the dependency-inversion seam exists today.
 2. **Split when measured pain appears**: restart/GPU contention makes the
-   weight-loading cost visible in `09-observability.md` stage timings.
+   weight-loading cost visible in `observability.md` stage timings.
 3. When splitting, prefer the upstream **`laya.serve`** HTTP surface
    (already ships with bearer auth, health probe, env-var config) over writing
    a bespoke wrapper — verify its `/v1/systemone` wire protocol fits our
-   client first (`06-laya.md` §4, `12-future-evolution.md`).
+   client first (`06-laya.md` §4, `future-evolution.md`).
 
 This is a two-way door: cheap to reverse this month, expensive only if model
 traffic is spread across call sites — which the `decision/` boundary
@@ -146,7 +146,7 @@ prevents.
 ## 5. Extension seams (summary)
 
 Each future capability has a pre-identified home; details and triggers in
-`12-future-evolution.md`.
+`future-evolution.md`.
 
 | Future capability | Plugs in at |
 |---|---|

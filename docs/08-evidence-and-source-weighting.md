@@ -63,7 +63,7 @@ weight = base(tier) × laya_confidence × recency_factor
 
 All numbers are **configuration, not code** — tunable without a deploy
 philosophy; stored in config for the MVP, later in DB rows if they start
-moving (`12-future-evolution.md`).
+moving (`future-evolution.md`).
 
 ### 3.3 Roll-up → verdict candidate
 
@@ -114,4 +114,4 @@ that is the extension point this doc exists to protect.
 `weighting/` and `validation/` are pure functions over plain structures:
 property tests (adding a copy never increases totals; a `forum`-only set never
 yields `TRUE`; breaking mode never lowers a threshold), plus golden cases
-from the eval set (`10-devops-mlops.md`).
+from the eval set (`mlops.md`).

@@ -56,12 +56,12 @@ flowchart LR
 Rules that keep these contracts honest:
 
 - **Nothing downstream of the harness ever receives raw HTML** — only the
-  sanitized `EvidencePackage` (`11-security-boundaries.md`).
+  sanitized `EvidencePackage` (`security.md`).
 - **`weighting` and `validation` are pure**: same inputs → same outputs, so
   verdict math is testable and explainable without a model or a database.
 - **Versioned fields ride along**: `Verdict` carries the Laya checkpoint id
   and question-schema version so every investigation is reproducible
-  (`10-devops-mlops.md`).
+  (`mlops.md`).
 
 ## 3. Who calls whom (runtime view)
 

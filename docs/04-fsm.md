@@ -62,7 +62,7 @@ intermediates instead of re-fetching the web.
 
 - **Every transition is logged** (structured, with `investigation_id`) — the
   transition history lives in logs, not in a second database table
-  (`09-observability.md`).
+  (`observability.md`).
 - **`investigations.state` holds the current state**; it is written
   transactionally with the work that caused the transition, so a crash leaves
   a truthful row (`07-database-schema.md`).
@@ -111,7 +111,7 @@ the FSM, and `CLASSIFYING` performs detection + extraction. See
   threshold are marked `FAILED` (`interrupted by restart`). Simple, truthful,
   no resurrection bugs.
 - **Resume-from-checkpoint** is a deferred enhancement — the checkpoints make
-  it possible without schema changes (`12-future-evolution.md`).
+  it possible without schema changes (`future-evolution.md`).
 
 ## 6. Open questions
 

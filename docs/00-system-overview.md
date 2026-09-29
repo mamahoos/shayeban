@@ -41,7 +41,7 @@ flowchart LR
 
 Whether an inline invocation can be answered *synchronously* (Telegram imposes
 short timeouts) or must acknowledge and edit the message later is an open
-product question — see `12-future-evolution.md` and the summary of open
+product question — see `future-evolution.md` and the summary of open
 questions.
 
 ## 3. Conceptual layer map
@@ -84,7 +84,7 @@ Two properties of this map are load-bearing:
 - **Layer 5 → layer 6 is the trust boundary.** Everything below the harness
   (layers 6–10) only ever sees structured evidence the harness produced;
   scraped web content is untrusted data, never instructions
-  (`11-security-boundaries.md`).
+  (`security.md`).
 - **Layers 7–8 are separable on purpose.** Retrieving evidence, evaluating it
   (Laya), weighting it, aggregating it, and producing the verdict are distinct
   steps so the model can be swapped without rewriting fact-checking logic
@@ -117,8 +117,11 @@ Two properties of this map are load-bearing:
 | How is Laya integrated and versioned? | `06-laya.md` |
 | What is persisted? | `07-database-schema.md` |
 | How are sources/evidence weighted? | `08-evidence-and-source-weighting.md` |
-| What do we observe? | `09-observability.md` |
-| How is it built, deployed, evaluated? | `10-devops-mlops.md` |
-| What are the trust boundaries? | `11-security-boundaries.md` |
-| What is deliberately deferred, and where does it plug in? | `12-future-evolution.md` |
+| What do we observe? | `observability.md` |
+| How is the development environment and CI designed? | `devops.md` |
+| How is the stack deployed on a laptop? | `deployment.md` |
+| How are models, prompts and configs versioned? | `mlops.md` |
+| How is AI quality measured? | `evaluation.md` |
+| What are the trust boundaries? | `security.md` |
+| What is deliberately deferred, and where does it plug in? | `future-evolution.md` |
 | What is missing today? | `architecture-gap-analysis.md` |
