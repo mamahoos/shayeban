@@ -27,7 +27,9 @@ Team of five; everyone reviews, everyone merges to `main` through a PR.
 
 - Architecture docs are numbered (`00`–`08`); engineering docs use plain
   names (`devops.md`, `deployment.md`, `mlops.md`, `evaluation.md`,
-  `observability.md`, `security.md`, `future-evolution.md`).
+  `observability.md`, `security.md`, `future-evolution.md`); planning docs
+  are `roadmap.md`, `first-milestone.md`, `devops-roadmap.md`,
+  `mlops-roadmap.md`.
 - The index and reading order live in [`docs/README.md`](docs/README.md);
   the layer numbering every doc references comes from
   [`docs/00-system-overview.md`](docs/00-system-overview.md).
