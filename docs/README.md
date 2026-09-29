@@ -34,6 +34,15 @@ what exists today, and marks every deliberate deferral.
 | `security.md` | Trust boundaries, input threats, secrets, Docker/Actions hardening |
 | `future-evolution.md` | MVP → Future → Trigger per subsystem, extension points, open questions |
 
+**Part 3 — implementation planning**
+
+| Doc | Covers |
+|---|---|
+| `roadmap.md` | Nine phases, six milestones, task sets, GitHub structure |
+| `first-milestone.md` | M0: the first vertical slice, 15 concrete tasks, demo DoD |
+| `devops-roadmap.md` | Which tasks a DevOps contributor owns — and what is not justified yet |
+| `mlops-roadmap.md` | Which tasks an MLOps contributor owns — registry-less on purpose |
+
 ## Provenance
 
 | Doc | Origin |
@@ -43,4 +52,5 @@ what exists today, and marks every deliberate deferral.
 | `01-…`, `observability.md`, `deployment.md` | Absorb the former `03-microservices-architecture.md` (monolith decision, module boundaries → 01; observability → observability.md; deployment → deployment.md), which was then removed |
 | `devops.md`, `mlops.md`, `evaluation.md` | Split out of and supersedes the intermediate `10-devops-mlops.md` |
 | `observability.md`, `security.md`, `future-evolution.md` | Renamed from the first-pass `09-…`, `11-…`, `12-…` and expanded for the DevOps/MLOps phase |
+| `roadmap.md`, `first-milestone.md`, `devops-roadmap.md`, `mlops-roadmap.md` | New in the roadmap phase — implementation planning only |
 | `00`–`04`, `06`, `08`, gap analysis | New in this doc set |
