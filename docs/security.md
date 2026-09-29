@@ -58,7 +58,28 @@ The single choke point for external content (`05-harness-and-news-ingestion.md`
   costs one classification, not the pipeline.
 - Bot token never appears in logs (redact at the logging boundary).
 
-## 4. B3 — Internal services
+## 4. Malicious claims (either surface)
+
+A claim is untrusted *content*, not untrusted *instructions* — the same
+stance as scraped pages, applied to what users type:
+
+- **Injection through the claim itself** ("ignore previous instructions…"):
+  the claim is data inside the state payload, delimited and length-capped.
+  Structural backstop: Laya answers **fixed option sets** — there is no free
+  text channel through which a claim can steer the model into an arbitrary
+  output (`06-laya.md` §2). Detection/verdict questions have no "other"
+  option to smuggle text into.
+- **Social-engineering claims**: text impersonating officials or demanding
+  urgency cannot change tiers or weights — `sources.tier` is looked up by
+  domain, never inferred from the claim's wording.
+- **Cost abuse**: a claim crafted to force maximum searches/fetches is
+  bounded by the per-investigation budget (`05-…` §6) and per-user quotas;
+  the search API key never sees unbounded spend from one actor.
+- **Brigading** (many accounts forwarding one claim): quota per user,
+  clustering collapses duplicates — repetition updates counters, never
+  weights (`08-…` §2).
+
+## 5. B3 — Internal services
 
 | Rule | MVP stance |
 |---|---|
@@ -68,28 +89,59 @@ The single choke point for external content (`05-harness-and-news-ingestion.md`
 | Traefik / public exposure | only if a demo must leave the laptop; not a default |
 | TLS | belongs to whatever reverse proxy fronts a future deployment — out of MVP scope |
 
-## 5. Secrets & supply chain
+## 6. Secrets & API keys
 
-- Secrets live in `.env` (git-ignored) locally and in GitHub Actions secrets
-  in CI (`TELEGRAM_*` already) — never in source, never in images.
-- Lockfile-pinned Python dependencies; pinned base images by tag; model
-  weights pinned by HF revision (`10-devops-mlops.md` §5).
-- Least privilege is trivial at this scale and still enforced: the app is the
-  only process that may reach DB and model service.
+| Secret | Where it lives | Never |
+|---|---|---|
+| `BOT_TOKEN` | local `.env` (git-ignored); not needed in CI | source code, image layers, logs |
+| `SEARCH_API_KEY` | local `.env` only | logged (log provider + call counts, not the key), sent anywhere but the provider |
+| `DATABASE_URL` | compose env | hard-coded DSNs, host-published Postgres |
+| `TELEGRAM_*` | GitHub Actions **secrets** (notify workflow only) | fork PRs (GitHub withholds them by design), workflow files |
+| `LAYA_API_KEY` | internal compose env (when `laya-service` exists) | anything outside the internal network |
 
-## 6. Output & data handling
+General: `.env.example` documents every key with a placeholder; startup
+validation fails fast on missing keys rather than running degraded; nothing
+secret in images (build args are not a secret store).
+
+Supply chain: lockfile-pinned dependencies (audited in CI — `devops.md` §4),
+pinned base images, model weights pinned by HF revision (`mlops.md` §3).
+Least privilege at this scale means exactly one process (the app) may reach
+the database and the model service.
+
+## 7. Docker boundaries
+
+- Images built **from this repo's Dockerfile only** — no third-party app
+  images; base images pinned by tag (`deployment.md` §2).
+- App container runs as a **non-root user**; no `--privileged`, no Docker
+  socket mount, no host networking.
+- Services join the internal compose network; **no published ports by
+  default** — debug mappings bind `127.0.0.1` explicitly
+  (`deployment.md` §3).
+- Postgres data in a named volume, not bind-mounted into a shared workspace.
+
+## 8. GitHub Actions
+
+- Workflows run on `pull_request` (never `pull_request_target`) so fork PRs
+  execute **without** secrets and without write token exposure
+  (`devops.md` §5).
+- Job `permissions` set to the minimum needed (the notify workflow needs
+  read + its secrets; CI jobs need checks:write at most).
+- No secrets in `docker build` args, cache keys, or artifact names; CI does
+  not deploy, so it holds no deployment credentials.
+
+## 9. Output & data handling
 
 - Explanations are template-rendered from stored evidence — the bot never
   emits model-generated prose that we cannot audit (`explanation/`).
 - User identifiers stored for quotas/history; retention policy for raw
   message text is an open item (deferred with the feedback loop — see
-  `12-future-evolution.md`).
+  `future-evolution.md`).
 - `NEEDS_REVIEW` cases keep humans in the loop before anything questionable
   is amplified (`04-fsm.md`).
 
-## 7. Explicitly deferred
+## 10. Explicitly deferred
 
 Internet-facing deployment hardening (rate limiting at the edge, WAF,
 secrets manager, key rotation, formal threat model, dependency-scanning
 cadence in CI) — each earns its place when the system leaves the laptop
-(`12-future-evolution.md`).
+(`future-evolution.md`).

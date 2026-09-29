@@ -1,40 +1,43 @@
 # Future Evolution
 
-> Part of the Shayeban architecture docs. What is deliberately deferred, where
-> each deferred capability plugs in, and the evidence-based triggers for the
-> structural changes we are *not* making yet.
+> Part of the Shayeban architecture docs. How the system grows
+> **intentionally** instead of accumulating infrastructure: for every major
+> subsystem — what the MVP does now, what it could become, and the problem
+> that would justify the jump. Plus extension points and the team's open
+> questions.
 
-## 1. Deferred on purpose (and where it lands later)
+## 1. Per-subsystem: MVP → Future → Trigger
 
-| Deferred capability | Plugs in at | MVP stand-in |
-|---|---|---|
-| Dynamic source reputation / learned weights | `weighting/` + `sources` columns, updated by offline job from `feedback` | static tiers + hand-tuned thresholds (data, not code) |
-| Feedback-driven tuning loop | `feedback` table → reviewed cases → weight/threshold config | review queue exists; no automation |
-| Job queue / background workers | `investigation/` orchestrator (already the single call site) | asyncio tasks in one process |
-| Laya as separate service | constructor swap behind `PredictRunner` (`06-laya.md` §4) | in-process runner |
-| Resume-from-checkpoint FSM | persisted checkpoints already exist (`CLAIM_EXTRACTED`, `EVIDENCE_READY`) | restart → mark interrupted investigations `FAILED` |
-| Public API / web UI | `api/` module + existing repositories | `/health` only |
-| Generative model (canonicalization, query-gen) | port inside `claim_extraction/` | *undecided — see gap analysis; biggest open dependency* |
-| Inline "ack now, edit later" delivery | `bot_gateway` delivery abstraction | synchronous attempt; product question Q1 below |
-| Per-topic breaking thresholds, learned velocity | `harness` volatility config | global fixed thresholds (`05-…` §5.2) |
-| State-transition history table | new table (if logs prove insufficient) | structured logs carry transitions (`09-…`) |
-| Public exposure (Traefik, TLS, edge rate limits) | compose additions | laptop-only by default (`11-…` §4) |
-| Centralized observability stack | log fields map to metric labels (`09-…` §3) | JSON logs + `jq` |
+| Component | MVP now (why this is enough) | Future | Trigger to evolve |
+|---|---|---|---|
+| **Docker Compose** | `app` + `postgres` on a laptop; one command, same stack for everyone | multi-host, orchestrator | compose can't express what we need (health-dependent rolling updates across hosts) |
+| **Single-process app (asyncio)** | one event loop runs bot + pipeline concurrently; no delivery semantics to get wrong | background workers + queue | measured event-loop saturation: investigations queueing, p95 latency degrading under demo load |
+| **Redis / shared cache** | verdict cache lives in Postgres (it's just rows + indexes); cross-process cache has no consumers | Redis for hot cache/pub-sub | a second process exists *and* cache hit latency from Postgres shows up in stage timings |
+| **Kubernetes** | nobody operates it; `compose up` is the deployment | any orchestrator | multiple machines or deployment cadence where manual compose deploys actually hurt |
+| **Reverse proxy (Traefik) / TLS** | nothing listens on the network; debug ports bind `127.0.0.1` | proxy + TLS in front of the app | a demo must be reachable beyond the laptop/home LAN |
+| **`laya-service` container** | in-process runner behind `PredictRunner`; zero network code (`01-architecture.md` §4.2) | separate warm container via `laya.serve` | weight-loading blocks restarts or GPU contention visible in stage timings |
+| **Model registry (MLflow-style)** | models are HF checkpoints pinned by revision; provenance in `investigations` rows; eval history in git (`mlops.md`) | registry for owned artifacts | we produce artifacts git/HF can't comfortably hold (fine-tunes, quantized variants) |
+| **Prometheus + Grafana** | structured JSON logs + `jq`; signal catalog defined (`observability.md` §3) | metrics endpoint + dashboards | `jq` stops answering "is FAILED rate rising?" fast enough to matter |
+| **Centralized logging (Loki/Graylog)** | one container, one log stream | aggregated logs across processes | the system splits into enough processes that `docker compose logs` loses the thread |
+| **Distributed tracing** | `investigation_id` correlates every event in one stream | OpenTelemetry spans | services multiply to the point where one log stream can't reconstruct a request |
+| **Harness sandboxing** | sanitization + caps in-process (single choke point, `security.md` §2) | fetch/extract in an isolated worker | hostile-content volume or severity outgrows in-process sanitization |
+| **Background queue (durable)** | asyncio task per investigation + persisted FSM state; restarts mark orphans `FAILED` (`04-fsm.md` §5) | broker + workers, resume-from-checkpoint | investigations must survive restarts as *work*, not as `FAILED` rows — i.e. real usage appears |
+| **Search provider** | one provider behind the harness port, budget-capped (`05-…` §6) | multi-provider failover/federation | provider outages/quotas visibly starve evidence yield |
+| **Embedding model change** | one pinned model, recorded, single vector space (`mlops.md` §3.3) | newer/better embeddings | eval shows clustering quality is the bottleneck — shipped as an Alembic re-embed migration, never mixed vectors |
+| **Source reputation** | deterministic: tiers + hand-tuned thresholds, auditable (`08-…`) | feedback-driven scoring, learned weights | feedback volume exists and static weights measurably misrank sources |
+| **Generative model (extraction/query-gen)** | open question Q2 — heuristics or light model behind a port (`claim_extraction/`) | local LLM / API choice revisited | quality ceiling proven by eval (retrieval recall poor because queries are weak) |
+| **Public API / web UI** | `api/` exists with `/health` only | real endpoints + auth | an actual consumer beyond the bot |
+| **State-transition history table** | transitions in structured logs (`observability.md` §2) | dedicated table if queried often | debugging/analysis repeatedly needs SQL over the transition history |
+| **Inline delivery pattern** | synchronous attempt; async edit unconfirmed (Q1) | ack + edit-later | Telegram constraints confirmed by prototype |
+| **FSM resume-from-checkpoint** | restart marks orphans `FAILED` (`04-fsm.md` §5) | resume from `CLAIM_EXTRACTED`/`EVIDENCE_READY` | restarts during active use start losing meaningful work |
+| **Feedback loop automation** | `feedback` review queue, manual review | offline job updating weights/tiers | reviewed cases accumulate enough to act on |
 
-## 2. Split triggers (evidence-based, not aesthetic)
+Rule of thumb behind every row: **we adopt the upgrade when the current
+mechanism's failure is measured, not when the upgrade sounds professional.**
+Signals come from `observability.md`; each upgrade must name the signal that
+justified it.
 
-| Change | Trigger (measured) | Cost if done early |
-|---|---|---|
-| `laya-service` container | weight-loading blocks restarts / GPU contention visible in stage timings | second process to operate for no gain |
-| Queue + workers | investigations queuing behind a single event loop; p95 stage latency degrades under demo load | Redis/broker ops, delivery semantics, exactly-once headaches |
-| Harness isolation | untrusted-content threat grows beyond sanitization-in-process (larger crawl volumes, hostile sites) | sandbox IPC complexity |
-| Postgres off the laptop | multi-user demo needs uptime beyond one machine | backup/DR burden with no users |
-| Metrics stack | `jq` stops being enough to answer "is FAILED rate rising?" | running Prometheus/Grafana for one operator |
-
-Each trigger names a signal produced by `09-observability.md` — if we can't
-measure it, we don't act on it.
-
-## 3. Extension points (one-line index)
+## 2. Extension points (one-line index)
 
 Detailed in `01-architecture.md` §5; the non-obvious ones:
 
@@ -49,7 +52,7 @@ Detailed in `01-architecture.md` §5; the non-obvious ones:
 - **Multi-language explanation**: `explanation/` templates are already
   keyed artifacts; no pipeline change.
 
-## 4. Open questions for the team
+## 3. Open questions for the team
 
 | # | Question | Blocks |
 |---|---|---|
@@ -59,5 +62,5 @@ Detailed in `01-architecture.md` §5; the non-obvious ones:
 | Q4 | Group scope: privacy mode on (commands only) or off (all messages)? Laya-per-message cost acceptable? | group gate design, quotas |
 | Q5 | Confirm FSM ordering choice (`VALIDATION` before `VERDICT`) — see `04-fsm.md` §4 | FSM implementation |
 | Q6 | Laya serving: start in-process (recommended) or `laya-service` container from day one, given `laya.serve` exists? | compose topology |
-| Q7 | Eval set: who owns the golden claims, and do we gate CI on it or run it manually? | `10-devops-mlops.md` §6 |
+| Q7 | Eval set: who owns the golden claims, and do we gate CI on it or run it manually? | `evaluation.md` |
 | Q8 | `weighting/` as its own module vs. living inside `decision/` — confirm the boundary change vs. the former module list | module scaffold |
