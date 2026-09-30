@@ -303,3 +303,7 @@ run, expected output) into the root README quick start.
 | Laya checkpoint heavy to download | develop against FakeRunner; real checkpoint only needed for task 10's manual run |
 | Telegram inline timing limits | placeholder-ack first (already the slice's shape); edit-later is Q1, outside the slice |
 | Scope creep toward clustering/cache | scope table (§3) is the contract — additions go to the phase backlog in `roadmap.md` |
+
+---
+
+<sub>**19/21** · [← Roadmap](roadmap.md) · [Docs index](README.md) · [DevOps roadmap →](devops-roadmap.md)</sub>

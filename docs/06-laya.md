@@ -97,3 +97,7 @@ The package exposes hooks (`HookRegistry`, usage aggregation) around
 `decide()`; `observability.md` uses them (or wrapper logging) to record
 per-pass latency, checkpoint used, and state size. Errors here are retryable
 (`RETRYING` in `04-fsm.md`), never silent.
+
+---
+
+<sub>**7/21** · [← 05 · Harness](05-harness-and-news-ingestion.md) · [Docs index](README.md) · [07 · Database schema →](07-database-schema.md)</sub>

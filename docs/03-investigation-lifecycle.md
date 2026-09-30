@@ -133,3 +133,7 @@ distinct is what lets observability separate "the world is ambiguous" from
 | Group | reply to the triggering message (or channel post), verdict + explanation + citations |
 | Inline | answer inline query (ack or result); edit final verdict later if async pattern is confirmed |
 | Both | delivery is `bot_gateway`'s concern only — the pipeline emits an `Explanation`, not a Telegram message |
+
+---
+
+<sub>**4/21** · [← 02 · Components](02-components.md) · [Docs index](README.md) · [04 · FSM →](04-fsm.md)</sub>

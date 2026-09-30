@@ -186,3 +186,7 @@ CREATE INDEX ON investigations (state_updated_at)
 The `ivfflat` index requires an approximate row-count estimate to tune
 `lists` properly once there's real data volume; for the MVP, the default is
 fine and can be re-tuned after the first few weeks of production data.
+
+---
+
+<sub>**8/21** · [← 06 · Laya](06-laya.md) · [Docs index](README.md) · [08 · Evidence & weighting →](08-evidence-and-source-weighting.md)</sub>

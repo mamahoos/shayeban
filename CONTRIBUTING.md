@@ -33,6 +33,10 @@ Team of five; everyone reviews, everyone merges to `main` through a PR.
 - The index and reading order live in [`docs/README.md`](docs/README.md);
   the layer numbering every doc references comes from
   [`docs/00-system-overview.md`](docs/00-system-overview.md).
+- Reading-order documents are chained: the index tables link every document,
+  and each document ends with the nav footer
+  (`position · previous · index · next`). When a document is added, renamed,
+  or removed, update the index **and** the affected footers.
 - Each doc starts with the `> Part of the Shayeban architecture docs …`
   blockquote; use Mermaid for diagrams; keep cross-references as
   `` `NN-file.md` `` / `` `file.md` `` so link checks can verify them.

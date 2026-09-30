@@ -48,3 +48,7 @@ everyone), then stay on call for Phase 8, then the soft eval gate.
   images; forks never see secrets).
 - If a task here seems to require a skipped technology, the task is wrong —
   re-read the trigger table first (`roadmap.md` §13).
+
+---
+
+<sub>**20/21** · [← First milestone (M0)](first-milestone.md) · [Docs index](README.md) · [MLOps roadmap →](mlops-roadmap.md)</sub>

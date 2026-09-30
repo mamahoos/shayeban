@@ -157,3 +157,7 @@ Each future capability has a pre-identified home; details and triggers in
 | Job queue / workers | `investigation/` orchestration seam |
 | Public API / admin UI | `api/` module |
 | Feedback-driven weight tuning | `feedback` table → offline job → `sources`/`weighting` config |
+
+---
+
+<sub>**2/21** · [← 00 · System overview](00-system-overview.md) · [Docs index](README.md) · [02 · Components →](02-components.md)</sub>

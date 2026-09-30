@@ -398,3 +398,7 @@ distributed tracing, Prometheus/Grafana, model registry, queues — each with
 its documented trigger in `future-evolution.md` §1, `mlops.md` §7, and
 `devops.md` §4. If a task in this roadmap ever needs one of them to be
 completed, that is a signal to stop and re-read the trigger table first.
+
+---
+
+<sub>**18/21** · [← Future evolution](future-evolution.md) · [Docs index](README.md) · [First milestone (M0) →](first-milestone.md)</sub>

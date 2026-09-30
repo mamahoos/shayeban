@@ -30,3 +30,7 @@ today, not what another repo prototypes.
 | Security principles in `05-…`/`11-…` | Enforced at three boundaries: web sanitizer, gateway validation + quotas, internal-only DB/model with bearer | Nothing enforced in code | Boundaries erode first under deadline pressure if they exist only as prose |
 | No deployment artifact | Local `docker compose`: `app` + `postgres` (+ later `laya-service`) | No compose, no Dockerfile | Nothing to demo; "it runs on my machine" unverifiable by teammates |
 | Product defines inline **and** group surfaces | Both funnel into one pipeline (group gate → FSM) | Pipeline entry abstraction not designed beyond `03-…` §1 | Two ad-hoc entry paths would fork the architecture where it should converge |
+
+---
+
+<sub>**10/21** · [← 08 · Evidence & weighting](08-evidence-and-source-weighting.md) · [Docs index](README.md) · [DevOps →](devops.md)</sub>

@@ -145,3 +145,7 @@ Internet-facing deployment hardening (rate limiting at the edge, WAF,
 secrets manager, key rotation, formal threat model, dependency-scanning
 cadence in CI) — each earns its place when the system leaves the laptop
 (`future-evolution.md`).
+
+---
+
+<sub>**16/21** · [← Observability](observability.md) · [Docs index](README.md) · [Future evolution →](future-evolution.md)</sub>
