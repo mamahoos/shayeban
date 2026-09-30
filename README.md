@@ -41,8 +41,13 @@ docker compose up          # postgres + migrations + app
 
 ## Documentation
 
-The index and reading order live in [`docs/README.md`](docs/README.md).
-Start at [`docs/00-system-overview.md`](docs/00-system-overview.md).
+- **[Docs index](docs/README.md)** — reading order for the full set
+- **[Start reading: 00 · System overview](docs/00-system-overview.md)** — surfaces, layer map, glossary
+- **[Roadmap](docs/roadmap.md)** — phases, milestones, and the [first milestone](docs/first-milestone.md)
+- **[Gap analysis](docs/architecture-gap-analysis.md)** — current vs. desired
+
+Each document ends with a footer linking to the previous/next document in
+reading order and back to the index.
 
 ## Contributing
 
