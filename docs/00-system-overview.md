@@ -125,3 +125,7 @@ Two properties of this map are load-bearing:
 | What are the trust boundaries? | `security.md` |
 | What is deliberately deferred, and where does it plug in? | `future-evolution.md` |
 | What is missing today? | `architecture-gap-analysis.md` |
+
+---
+
+<sub>**1/21** · [Docs index](README.md) · [01 · Architecture →](01-architecture.md)</sub>

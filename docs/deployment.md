@@ -121,3 +121,7 @@ Redis, message queues, Kubernetes, reverse proxies, managed databases,
 monitoring stacks, CI runners beyond GitHub-hosted — each with a named
 trigger in `future-evolution.md`. Deployment complexity must be pulled in by
 measured need, not by aesthetics.
+
+---
+
+<sub>**12/21** · [← DevOps](devops.md) · [Docs index](README.md) · [MLOps →](mlops.md)</sub>

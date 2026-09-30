@@ -172,3 +172,7 @@ Enforce a **budget per investigation**, not just per user:
 
 Combine this with per-user daily quotas (tracked in `users.daily_quota_used`,
 see `07-database-schema.md`) to prevent abuse from burning the shared budget.
+
+---
+
+<sub>**6/21** · [← 04 · FSM](04-fsm.md) · [Docs index](README.md) · [06 · Laya →](06-laya.md)</sub>

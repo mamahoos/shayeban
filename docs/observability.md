@@ -95,3 +95,7 @@ Laya reachable when split). Compose uses it for container healthchecks.
 What we will **not** do in the MVP: distributed tracing, APM tooling,
 high-cardinality metric stores. One process has one log stream; correlate on
 `investigation_id`.
+
+---
+
+<sub>**15/21** · [← Evaluation](evaluation.md) · [Docs index](README.md) · [Security →](security.md)</sub>

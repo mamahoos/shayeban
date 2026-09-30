@@ -64,3 +64,7 @@ Detailed in `01-architecture.md` §5; the non-obvious ones:
 | Q6 | Laya serving: start in-process (recommended) or `laya-service` container from day one, given `laya.serve` exists? | compose topology |
 | Q7 | Eval set: who owns the golden claims, and do we gate CI on it or run it manually? | `evaluation.md` |
 | Q8 | `weighting/` as its own module vs. living inside `decision/` — confirm the boundary change vs. the former module list | module scaffold |
+
+---
+
+<sub>**17/21** · [← Security](security.md) · [Docs index](README.md) · [Roadmap →](roadmap.md)</sub>

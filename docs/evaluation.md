@@ -96,3 +96,7 @@ dataset breeds mute-button culture.
   note, §3).
 - No LLM-as-judge for explanations in the MVP: humans score eight items in
   five minutes; a judge model would need its own eval first.
+
+---
+
+<sub>**14/21** · [← MLOps](mlops.md) · [Docs index](README.md) · [Observability →](observability.md)</sub>

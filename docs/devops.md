@@ -109,3 +109,7 @@ Notes:
 | Self-hosted runner | GitHub-hosted minutes too slow or too limited |
 | Merge queue | merge frequency causes broken-main races (unlikely at 5 people) |
 | Release automation/tagging | we start cutting versioned releases |
+
+---
+
+<sub>**11/21** · [← Architecture gap analysis](architecture-gap-analysis.md) · [Docs index](README.md) · [Deployment →](deployment.md)</sub>

@@ -115,3 +115,7 @@ that is the extension point this doc exists to protect.
 property tests (adding a copy never increases totals; a `forum`-only set never
 yields `TRUE`; breaking mode never lowers a threshold), plus golden cases
 from the eval set (`mlops.md`).
+
+---
+
+<sub>**9/21** · [← 07 · Database schema](07-database-schema.md) · [Docs index](README.md) · [Architecture gap analysis →](architecture-gap-analysis.md)</sub>

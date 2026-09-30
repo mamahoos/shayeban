@@ -120,3 +120,7 @@ the FSM, and `CLASSIFYING` performs detection + extraction. See
   loop.
 - Q: Exact per-state timeouts and overall investigation deadline (needs
   empirical timings from the first working pipeline).
+
+---
+
+<sub>**5/21** · [← 03 · Investigation lifecycle](03-investigation-lifecycle.md) · [Docs index](README.md) · [05 · Harness →](05-harness-and-news-ingestion.md)</sub>

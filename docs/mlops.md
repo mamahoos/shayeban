@@ -140,3 +140,7 @@ eval/
 config/
 └── weights.toml         # thresholds/bands/budgets → hashed as config_version
 ```
+
+---
+
+<sub>**13/21** · [← Deployment](deployment.md) · [Docs index](README.md) · [Evaluation →](evaluation.md)</sub>

@@ -101,3 +101,7 @@ Notes:
    slipping.
 4. No module imports another module's internal submodules; only the public
    functions/types a module exports.
+
+---
+
+<sub>**3/21** · [← 01 · Architecture](01-architecture.md) · [Docs index](README.md) · [03 · Investigation lifecycle →](03-investigation-lifecycle.md)</sub>

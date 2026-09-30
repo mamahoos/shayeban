@@ -48,3 +48,7 @@ Everything in `mlops.md` §7 — repeated here so this doc is self-contained:
   (`evaluation.md` §3).
 - If a task here seems to require a skipped system, the task is wrong —
   re-read §3 first.
+
+---
+
+<sub>**21/21** · [← DevOps roadmap](devops-roadmap.md) · [Docs index](README.md)</sub>
