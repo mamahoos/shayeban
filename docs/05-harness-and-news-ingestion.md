@@ -21,7 +21,7 @@ for two reasons:
 ## 2. Source Registry (config-driven, not hardcoded)
 
 Source credibility is **data**, not code. Store it as a table (see
-`02-database-schema.md`, `sources`), not as a Python dict baked into a deploy.
+`07-database-schema.md`, `sources`), not as a Python dict baked into a deploy.
 
 | Tier | Examples | Weight in aggregation |
 |---|---|---|
@@ -78,8 +78,9 @@ embedding similarity against `claim_clusters.embedding` (pgvector):
   `last_seen_at`.
 - No match → create a new cluster.
 
-This clustering is also what powers the dedup/cache layer described in the
-main architecture — it is the same mechanism serving two purposes (cost
+This clustering is also what powers the dedup/cache path described in
+`03-investigation-lifecycle.md` §4 — it is the same mechanism serving two
+purposes (cost
 control *and* volatility measurement), which is why it belongs in the harness
 rather than being duplicated.
 
@@ -126,8 +127,8 @@ naturally noisier) is a reasonable v2 refinement, not a V1 requirement.
 
 ### 5.3 What `breaking_mode` actually changes downstream
 
-This flag is read by the decision layer (Layer 6/7 in the main architecture
-doc) and changes behavior along four axes:
+This flag is read by the aggregation step (`weighting/`, layer 8 of
+`00-system-overview.md`) and changes behavior along four axes:
 
 | Axis | Normal mode | Breaking mode |
 |---|---|---|
@@ -136,7 +137,7 @@ doc) and changes behavior along four axes:
 | Cache TTL for this cluster | Long (e.g. 24h) | Short (e.g. 15–30 min) — forces re-investigation instead of serving a stale cached verdict |
 | Poll/re-check interval | Hours | 1–2 minutes |
 
-The key design point: **the aggregation logic (Layer 6 in the main doc) must
+The key design point: **the aggregation logic (`weighting/`, layer 8) must
 receive `breaking_mode` as part of the evidence package state**, not decide it
 independently — the harness is the only layer with the ingestion-rate data
 needed to compute it.
@@ -150,7 +151,7 @@ If 100 new documents about a cluster arrive in 15 minutes:
    short window — any user forwarding this claim triggers a fresh check
    instead of getting a (now possibly outdated) cached answer.
 3. The aggregator raises its confirmation bar and the explanation template
-   (see main doc, Layer 8) explicitly states the situation is developing,
+   (layer 10 — see `02-components.md`) explicitly states the situation is developing,
    e.g.: *"This is a fast-moving story (100+ new reports in the last 15
    minutes). Verdict: UNCLEAR — re-check recommended."*
 
@@ -170,4 +171,4 @@ Enforce a **budget per investigation**, not just per user:
   `UNCLEAR — investigation incomplete`, never silently retry indefinitely.
 
 Combine this with per-user daily quotas (tracked in `users.daily_quota_used`,
-see `02-database-schema.md`) to prevent abuse from burning the shared budget.
+see `07-database-schema.md`) to prevent abuse from burning the shared budget.
