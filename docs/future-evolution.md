@@ -58,12 +58,24 @@ Detailed in `01-architecture.md` §5; the non-obvious ones:
 |---|---|---|
 | Q1 | Inline delivery: can we ack immediately and edit the posted message later (needs `inline_message_id` / callback pattern), or must everything fit Telegram's inline timeout? | `bot_gateway` delivery design |
 | Q2 | Which generative model for canonical claim + bilingual query generation — local small LLM, external API, or heuristics-first? | `claim_extraction/`, harness inputs, eval scope |
-| Q3 | Which search API (provider, key, cost envelope)? | harness implementation, budgets |
+| Q3 | **Resolved: Brave Search API** — free tier ≈ 1,000 searches/month (`SEARCH_API_KEY` in `.env`); SearXNG self-hosted as documented keyless fallback. Original: which provider, key, cost envelope? | harness implementation, budgets |
 | Q4 | Group scope: privacy mode on (commands only) or off (all messages)? Laya-per-message cost acceptable? | group gate design, quotas |
 | Q5 | Confirm FSM ordering choice (`VALIDATION` before `VERDICT`) — see `04-fsm.md` §4 | FSM implementation |
 | Q6 | Laya serving: start in-process (recommended) or `laya-service` container from day one, given `laya.serve` exists? | compose topology |
 | Q7 | Eval set: who owns the golden claims, and do we gate CI on it or run it manually? | `evaluation.md` |
 | Q8 | `weighting/` as its own module vs. living inside `decision/` — confirm the boundary change vs. the former module list | module scaffold |
+
+**Q3 resolution note.** Google's Custom Search JSON API is closed to new
+customers (discontinuing 2027-01-01), so it is not an option. Brave Search
+API (terms as of 2026-02) gives $5 recurring credit per month — ≈ 1,000
+searches, i.e. ~250 investigations at the 4-query budget — needs a card on
+file (anti-fraud) and attribution in this repo's README for the credit, and
+sits behind the harness `SearchProvider` port so it stays swappable.
+SearXNG in compose is the documented keyless fallback, but from a single IP
+its usable upstreams collapse to DuckDuckGo (Google returns nothing
+server-side, Brave/Startpage suspend) — acceptable as fallback, not as
+primary. Action when the key is provisioned: 10-query Persian smoke test
+(fa result yield is a Q3 acceptance criterion).
 
 ---
 

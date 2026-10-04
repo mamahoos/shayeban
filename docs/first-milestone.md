@@ -34,7 +34,7 @@ reviewer can watch it happen and when CI proves it without the network.
 | Inline mode, live | Group per-message Laya detection (M1 — command entry only) |
 | FSM = designed states **minus `CLUSTERING`** (`roadmap.md` §5) | Clustering, verdict cache, resume-from-checkpoint |
 | Heuristic query generation (fa + en) behind a port | Generative query model (Q2) |
-| One search provider behind a port (Q3 decided now) | Multi-provider failover |
+| One search provider behind a port (Q3 decided: Brave Search API) | Multi-provider failover |
 | Fetch → extract → tier → URL/hash dedup, budget-capped | Embedding dedup, near-dup copy detection |
 | Laya stance + verdict passes in-process (pinned checkpoint) | `laya.serve` split, detection gate for groups |
 | Domain-level independence, simple tier × confidence × recency | Learned weights, per-topic thresholds |
@@ -43,8 +43,13 @@ reviewer can watch it happen and when CI proves it without the network.
 
 ## 4. Decisions this slice must make (write them down as they happen)
 
-1. **Q3 — search provider**: pick one (cost envelope, Persian support,
-   key). Half a day; blocks tasks 11–12.
+1. **Q3 — search provider: decided — Brave Search API** (≈1,000 free
+   searches/month at the current terms; key in `.env` as
+   `SEARCH_API_KEY`). Remaining actions when implementing task 11: sign up
+   (card on file + attribution in this repo's README are the free-credit
+   conditions) and run a 10-query Persian smoke test — fa result yield is
+   the acceptance criterion. Until the key exists, `FakeSearchProvider`
+   keeps tasks 11–14 unblocked.
 2. **Q2 — query generation**: heuristics-first (this slice's choice); the
    port keeps the model option open.
 3. **Q6 — serving**: in-process runner (recommended, no container until a
@@ -219,14 +224,15 @@ FakeRunner.
 
 **Description:** `QueryGenerator` port with heuristic implementation
 (claim keywords → 2 Persian + 2 English queries); `SearchProvider` port with
-the Q3 provider implementation (httpx); budget counters start here.
+the Brave Search implementation (Q3 decided; httpx); budget counters start
+here.
 
 **Acceptance criteria:**
 - [ ] Claim → ≤4 queries (fa+en) → ≤5 results each, counted against the budget
 - [ ] Provider fully behind the port (swap in tests with a fake)
 
 **Verification:** unit tests with fake provider; one `@live` manual search.
-**Dependencies:** Q3 decision, 7 · **Size:** M
+**Dependencies:** Brave API key provisioned (or `FakeSearchProvider`), 7 · **Size:** M
 
 #### Task 12: Fetch → extract → evidence items
 
@@ -299,7 +305,7 @@ run, expected output) into the root README quick start.
 
 | Risk | Mitigation |
 |---|---|
-| Q3 provider key delayed | `FakeSearchProvider` behind the port keeps tasks 11–14 unblocked (same pattern as FakeRunner) |
+| Brave API key delayed (sign-up needs card + attribution) | `FakeSearchProvider` behind the port keeps tasks 11–14 unblocked (same pattern as FakeRunner) |
 | Laya checkpoint heavy to download | develop against FakeRunner; real checkpoint only needed for task 10's manual run |
 | Telegram inline timing limits | placeholder-ack first (already the slice's shape); edit-later is Q1, outside the slice |
 | Scope creep toward clustering/cache | scope table (§3) is the contract — additions go to the phase backlog in `roadmap.md` |
