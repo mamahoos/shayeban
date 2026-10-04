@@ -56,4 +56,4 @@ conventions.
 
 ## License
 
-[GNU GPL v3](LICENSE).
+[GNU Affero General Public License v3 (AGPLv3)](LICENSE).
