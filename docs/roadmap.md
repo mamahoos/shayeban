@@ -158,12 +158,13 @@ that touches the outside world — the untrusted-content boundary (`security.md`
 §2) lives here.
 
 **Dependencies.** Phase 0 (config/budgets), Phase 2 (investigation context).
-**Blocking decision first:** Q3 (search provider).
+**Decision:** Q3 resolved — Brave Search API (rationale in the Q3
+resolution note in `future-evolution.md` §3).
 
 **Tasks**
 
-1. Decide Q3 (provider, key, cost envelope); implement one `SearchProvider`
-   behind a port (httpx).
+1. Implement the Brave Search `SearchProvider` behind a port (Q3 decided;
+   httpx) plus a `FakeSearchProvider` for offline tests.
 2. Query generation v0: heuristics (claim keywords, fa/en variants) behind a
    `QueryGenerator` port — the Q2 model slots in later.
 3. Fetcher: timeouts, byte caps, content-type checks, redirect limit, and
