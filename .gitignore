@@ -1,1 +1,14 @@
 repomix-output.xml
+
+# secrets — covered from day one (deployment.md §5)
+.env
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+
+# tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
