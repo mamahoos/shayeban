@@ -1,0 +1,8 @@
+# docker/compose.debug.yaml — temporary local debug mappings (deployment.md §3)
+# Usage:  docker compose -f docker/compose.yaml -f docker/compose.debug.yaml up
+# Nothing publishes a port by default; debugging adds an explicitly-local
+# mapping and removes it again. 127.0.0.1 only — never 0.0.0.0.
+#
+# Contents to define here:
+#   app:      ports: ["127.0.0.1:8000:8000"]     # GET /health, admin endpoints
+#   postgres: ports: ["127.0.0.1:5432:5432"]     # ad-hoc psql / inspection

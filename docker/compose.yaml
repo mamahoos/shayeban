@@ -1,0 +1,17 @@
+# docker/compose.yaml — base stack (deployment.md §2–§4)
+# Usage:  docker compose -f docker/compose.yaml up --build
+# One command, one host; nothing runs on the host except Docker itself.
+#
+# Contents to define here:
+#   services:
+#     app:   build from docker/Dockerfile (context: ..), single asyncio process,
+#            depends_on postgres (condition: service_healthy),
+#            entrypoint runs migrations then starts the app
+#     postgres: image pgvector/pgvector:pg16,
+#            healthcheck: pg_isready -U …,
+#            init script mount: ./postgres/init → /docker-entrypoint-initdb.d
+#   networks: one user-defined bridge (internal) — shayeban
+#   volumes:  pgdata → postgres:/var/lib/postgresql/data
+#
+# Rules: no service publishes a port by default; Telegram/search are egress-only.
+# Debug port mappings live in compose.debug.yaml, never here.

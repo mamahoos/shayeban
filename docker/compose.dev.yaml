@@ -1,0 +1,13 @@
+# docker/compose.dev.yaml — editable-dev overlay (deployment.md §8)
+# Usage:  docker compose -f docker/compose.yaml -f docker/compose.dev.yaml up
+# Fast iteration: bind-mount the repo into the app container so edits land
+# without an image rebuild. Unit tests / lint / typecheck still never need
+# Docker (they run on the host against pure logic + fakes).
+#
+# Alternative "editable dev" mode needs no overlay at all: run only Postgres
+# in compose and the app on the host venv —
+#   docker compose -f docker/compose.yaml up postgres
+#
+# Contents to define here:
+#   app: volumes: [..:/app] + whatever keeps the container's Python env usable
+#        with a mounted source tree (no rebuild per edit)
