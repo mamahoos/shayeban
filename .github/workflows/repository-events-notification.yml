@@ -1,0 +1,56 @@
+name: Repository Events Notification
+
+on:
+  push:
+    branches: ["**"]
+  issues:
+    types: [opened, closed, reopened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, closed, reopened, edited, synchronize]
+  pull_request_review_comment:
+    types: [created, edited]
+  release:
+    types: [published, created]
+  workflow_dispatch:
+
+# Grant only the permissions required to read the repository.
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Telegram Notification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Build notification message
+        id: build
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PATH: ${{ github.event_path }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          REF_NAME: ${{ github.ref_name }}
+          WORKSPACE: ${{ github.workspace }}
+        run: python3 .github/scripts/notify_telegram.py
+
+      - name: Send Telegram message
+        if: steps.build.outputs.send == 'true'
+        uses: appleboy/telegram-action@214f06cfa3d3a588c1472116889437e7c6fd29b1 # v1.1.1
+        with:
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          to: ${{ secrets.TELEGRAM_TO }}
+          message_file: tg-message.html
+          format: html
+          message_thread_id: "8643"
+          disable_web_page_preview: true
+          disable_notification: ${{ github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment' }}
