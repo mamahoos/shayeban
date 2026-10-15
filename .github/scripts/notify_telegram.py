@@ -29,8 +29,16 @@ def one_line(value: Any, cap: int) -> str:
 
 
 def escape_html(value: Any, cap: int = CAP_SHORT) -> str:
-    """Normalize, truncate, and HTML-escape untrusted text."""
-    return html.escape(one_line(value, cap), quote=False)
+    """Normalize, truncate, and double-escape untrusted text for Telegram.
+
+    drone-telegram runs html.UnescapeString() over the rendered message
+    (plugin.go), so entities are escaped twice: the file holds ``&amp;lt;``
+    and Telegram's HTML parser then receives ``&lt;``. Bare ``{{`` is wrapped
+    so RenderTrim, a Go template parse of the whole message, cannot fail on
+    text such as ``${{ matrix.os }}`` inside a commit message.
+    """
+    escaped = html.escape(html.escape(one_line(value, cap), quote=False), quote=False)
+    return escaped.replace("{{", '{{"{{"}}')
 
 
 def code(value: Any, cap: int = CAP_SHORT) -> str:
