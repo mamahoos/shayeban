@@ -84,10 +84,7 @@ def format_issue(event: Event, env: Environment) -> str:
 
     return "\n".join(
         [
-            (
-                f"<b>{icon} Issue #{issue.get('number', '?')} "
-                f"{escape_html(action)}</b>"
-            ),
+            (f"<b>{icon} Issue #{issue.get('number', '?')} {escape_html(action)}</b>"),
             f"📌 Title: {code(issue.get('title'), CAP_TITLE)}",
             *repository_details(env),
             f"🔗 {escape_html(issue.get('html_url', ''), CAP_URL)}",
@@ -115,11 +112,7 @@ def format_pull_request(event: Event, env: Environment) -> str:
     action = str(event.get("action", ""))
 
     if action == "closed":
-        label = (
-            "🔀 PR merged"
-            if pull_request.get("merged")
-            else "❌ PR closed"
-        )
+        label = "🔀 PR merged" if pull_request.get("merged") else "❌ PR closed"
     elif action == "opened":
         label = "🆕 PR"
     else:
@@ -145,10 +138,7 @@ def format_review_comment(event: Event, env: Environment) -> str:
 
     return "\n".join(
         [
-            (
-                "<b>💬 Review comment on PR "
-                f"#{pull_request.get('number', '?')}</b>"
-            ),
+            (f"<b>💬 Review comment on PR #{pull_request.get('number', '?')}</b>"),
             *repository_details(env),
             f"🔗 {escape_html(comment.get('html_url', ''), CAP_URL)}",
         ]
@@ -163,10 +153,7 @@ def format_release(event: Event, env: Environment) -> str:
 
     return "\n".join(
         [
-            (
-                f"🚀 <b>Release</b> {code(release.get('tag_name'))} "
-                f"<b>{status}</b>"
-            ),
+            (f"🚀 <b>Release</b> {code(release.get('tag_name'))} <b>{status}</b>"),
             *repository_details(env),
             f"🔗 {escape_html(release.get('html_url', ''), CAP_URL)}",
         ]
