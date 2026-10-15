@@ -45,20 +45,18 @@ Team of five; everyone reviews, everyone merges to `main` through a PR.
 
 ## Local development
 
-The application scaffold has not landed yet — until it does, "working
-locally" means editing and reviewing docs, and checking that cross-file
-references still resolve (a docs link-check job is designed in
-[`docs/devops.md`](docs/devops.md) §4 and ships with the scaffold).
-
-After the scaffold (contract defined in [`docs/devops.md`](docs/devops.md)):
-
 ```bash
 uv sync
+uv run pre-commit install    # once per clone
 uv run ruff format . && uv run ruff check .
-uv run mypy shayeban
+uv run mypy
 uv run pytest
-docker compose up --build   # full stack
+docker compose up --build    # full stack
 ```
+
+Hooks live in `.pre-commit-config.yaml`. Re-run with
+`uv run pre-commit run --all-files`. Skip one hook:
+`SKIP=gitleaks git commit ...`.
 
 `docker compose down -v` **destroys** local data — use it knowingly.
 
