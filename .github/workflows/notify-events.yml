@@ -13,6 +13,7 @@ on:
     types: [created, edited]
   release:
     types: [published, created]
+  workflow_dispatch:  # دکمه‌ی دستی برای تست نوتیفیکیشن
 
 jobs:
   notify:
@@ -20,92 +21,190 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Notify on Push
-        if: github.event_name == 'push' && github.event.deleted == false
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
-        with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
-          disable_notification: true
-          message: |
-            🆕 **Push to** `${{ github.repository }}`
-            👤 By: `${{ github.actor }}`
-            🌿 Ref: `${{ github.ref_name }}`
-            💬 Message: `${{ github.event.head_commit.message }}`
-            🔗 ${{ github.event.head_commit.url }}
+      # پیام به‌صورت HTML از پیش escape شده ساخته می‌شود:
+      # - تمام مقادیر داینامیک (عنوان، پیام کامیت، نام شاخه، …) با html.escape ایمن می‌شوند
+      # - طول فیلدها cap می‌شود تا از سقف 4096 کاراکتر تلگرام هیچ‌وقت رد نشویم
+      # - قبلاً با format: markdown هر کاراکتر نامتوازنِ (*، `، [، _) در کامیت/عنوان/لینک
+      #   کل پیام را با خطای "can't parse entities" رد می‌کرد
+      - name: Build message
+        id: build
+        run: |
+          python3 - <<'PY'
+          """Build the Telegram notification message (HTML) for a GitHub event.
 
-      - name: Notify on Issue
-        if: github.event_name == 'issues'
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
-        with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
-          message: |
-            **${{ github.event.action == 'opened' && '🆕 Issue' || github.event.action == 'closed' && '✅ Issue' || '🔄 Issue' }} #${{ github.event.issue.number }} ${{ github.event.action }}**
-            📌 Title: `${{ github.event.issue.title }}`
-            👤 By: `${{ github.actor }}`
-            📦 Repo: `${{ github.repository }}`
-            🔗 ${{ github.event.issue.html_url }}
+          Writes tg-message.html into GITHUB_WORKSPACE and send=true|false to GITHUB_OUTPUT.
+          """
 
-      - name: Notify on Issue Comment
-        if: github.event_name == 'issue_comment'
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
-        with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
-          disable_notification: true
-          message: |
-            💬 **Comment on Issue #${{ github.event.issue.number }}**
-            👤 By: `${{ github.actor }}`
-            📦 Repo: `${{ github.repository }}`
-            🔗 ${{ github.event.comment.html_url }}
+          import html
+          import json
+          import os
 
-      - name: Notify on Pull Request
-        if: github.event_name == 'pull_request'
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
-        with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
-          message: |
-            **${{ github.event.action == 'opened' && '🆕 PR' || github.event.action == 'closed' && (github.event.pull_request.merged && '🔀 PR merged' || '❌ PR closed') || '🔄 PR' }} #${{ github.event.pull_request.number }} ${{ github.event.action }}**
-            📌 Title: `${{ github.event.pull_request.title }}`
-            👤 By: `${{ github.actor }}`
-            📦 Repo: `${{ github.repository }}`
-            🔗 ${{ github.event.pull_request.html_url }}
+          CAP_MSG = 500
+          CAP_TITLE = 300
+          CAP_SHORT = 100
+          OUT_NAME = "tg-message.html"
 
-      - name: Notify on PR Review Comment
-        if: github.event_name == 'pull_request_review_comment'
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
-        with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
-          disable_notification: true
-          message: |
-            💬 **Review comment on PR #${{ github.event.pull_request.number }}**
-            👤 By: `${{ github.actor }}`
-            📦 Repo: `${{ github.repository }}`
-            🔗 ${{ github.event.comment.html_url }}
 
-      - name: Notify on Release
-        if: github.event_name == 'release'
-        uses: kioteam-ir/kio-github-actions/actions/telegram-notify@v1
+          def one_line(value, cap):
+              if value is None:
+                  return ""
+              text = " ".join(str(value).split())
+              if len(text) > cap:
+                  text = text[: cap - 1] + "…"
+              return text
+
+
+          def esc(value):
+              return html.escape(str(value), quote=False)
+
+
+          def c(value, cap=CAP_SHORT):
+              return "<code>" + esc(one_line(value, cap)) + "</code>"
+
+
+          def fmt_push(ev, env):
+              if ev.get("deleted"):
+                  return None
+              head = ev.get("head_commit") or {}
+              lines = [
+                  "🆕 <b>Push to</b> " + c(env.get("GITHUB_REPOSITORY", "")),
+                  "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                  "🌿 Ref: " + c(env.get("GITHUB_REF_NAME", "")),
+              ]
+              message = one_line(head.get("message"), CAP_MSG)
+              if message:
+                  lines.append("💬 Message: " + c(message, CAP_MSG))
+              if head.get("url"):
+                  lines.append("🔗 " + esc(head["url"]))
+              return "\n".join(lines)
+
+
+          def fmt_issues(ev, env):
+              issue = ev.get("issue") or {}
+              action = str(ev.get("action", ""))
+              icon = {"opened": "🆕", "closed": "✅"}.get(action, "🔄")
+              return "\n".join(
+                  [
+                      f"<b>{icon} Issue #{issue.get('number', '?')} {esc(action)}</b>",
+                      "📌 Title: " + c(issue.get("title"), CAP_TITLE),
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "🔗 " + esc(issue.get("html_url", "")),
+                  ]
+              )
+
+
+          def fmt_issue_comment(ev, env):
+              issue = ev.get("issue") or {}
+              comment = ev.get("comment") or {}
+              return "\n".join(
+                  [
+                      f"💬 <b>Comment on Issue #{issue.get('number', '?')}</b>",
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "🔗 " + esc(comment.get("html_url", "")),
+                  ]
+              )
+
+
+          def fmt_pr(ev, env):
+              pr = ev.get("pull_request") or {}
+              action = str(ev.get("action", ""))
+              if action == "closed":
+                  label = "🔀 PR merged" if pr.get("merged") else "❌ PR closed"
+              elif action == "opened":
+                  label = "🆕 PR"
+              else:
+                  label = "🔄 PR"
+              return "\n".join(
+                  [
+                      f"<b>{label} #{pr.get('number', '?')} {esc(action)}</b>",
+                      "📌 Title: " + c(pr.get("title"), CAP_TITLE),
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "🔗 " + esc(pr.get("html_url", "")),
+                  ]
+              )
+
+
+          def fmt_review_comment(ev, env):
+              pr = ev.get("pull_request") or {}
+              comment = ev.get("comment") or {}
+              return "\n".join(
+                  [
+                      f"💬 <b>Review comment on PR #{pr.get('number', '?')}</b>",
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "🔗 " + esc(comment.get("html_url", "")),
+                  ]
+              )
+
+
+          def fmt_release(ev, env):
+              release = ev.get("release") or {}
+              return "\n".join(
+                  [
+                      "🚀 <b>Release</b> " + c(release.get("tag_name")) + " <b>published</b>",
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "🔗 " + esc(release.get("html_url", "")),
+                  ]
+              )
+
+
+          def fmt_dispatch(ev, env):
+              return "\n".join(
+                  [
+                      "🧪 <b>Telegram notification test</b>",
+                      "📦 Repo: " + c(env.get("GITHUB_REPOSITORY", "")),
+                      "👤 By: " + c(env.get("GITHUB_ACTOR", "")),
+                      "🌿 Ref: " + c(env.get("GITHUB_REF_NAME", "")),
+                  ]
+              )
+
+
+          BUILDERS = {
+              "push": fmt_push,
+              "issues": fmt_issues,
+              "issue_comment": fmt_issue_comment,
+              "pull_request": fmt_pr,
+              "pull_request_review_comment": fmt_review_comment,
+              "release": fmt_release,
+              "workflow_dispatch": fmt_dispatch,
+          }
+
+
+          def main():
+              env = os.environ
+              name = env.get("GITHUB_EVENT_NAME", "")
+              with open(env["GITHUB_EVENT_PATH"], encoding="utf-8") as fh:
+                  event = json.load(fh)
+              builder = BUILDERS.get(name)
+              message = builder(event, env) if builder else None
+              with open(env.get("GITHUB_OUTPUT", os.devnull), "a", encoding="utf-8") as fh:
+                  fh.write("send=true\n" if message else "send=false\n")
+              if message:
+                  with open(os.path.join(env.get("GITHUB_WORKSPACE", "."), OUT_NAME), "w", encoding="utf-8") as fh:
+                      fh.write(message)
+                  print(message)
+              else:
+                  print(f"no message for event: {name}")
+
+
+          if __name__ == "__main__":
+              main()
+          PY
+
+      - name: Send Telegram message
+        if: steps.build.outputs.send == 'true'
+        # همان SHA‌ای که خود kioteam-ir/kio-github-actions با آن پین کرده (v1.1.1).
+        # مستقیم صدا زده می‌شود چون wrapper آن message_file را رد نمی‌کند.
+        uses: appleboy/telegram-action@214f06cfa3d3a588c1472116889437e7c6fd29b1 # v1.1.1
         with:
-          format: markdown
-          to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
+          to: ${{ secrets.TELEGRAM_TO }}
+          message_file: tg-message.html
+          format: html
+          message_thread_id: "8643"
           disable_web_page_preview: true
-          message: |
-            🚀 **Release** `${{ github.event.release.tag_name }}` **published**
-            📦 Repo: `${{ github.repository }}`
-            👤 By: `${{ github.actor }}`
-            🔗 ${{ github.event.release.html_url }}
+          disable_notification: ${{ github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment' }}
