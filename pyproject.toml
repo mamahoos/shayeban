@@ -1,0 +1,35 @@
+[project]
+name = "shayeban"
+dynamic = ["version"]
+description = "A Telegram-based claim and news fact-checking system"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "aiogram",
+    "pydantic",
+    "fastapi",
+    "pydantic-settings",
+    "laya",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pytest",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = false
