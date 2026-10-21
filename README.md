@@ -6,9 +6,10 @@ sending a message in a group the bot belongs to — and Shayeban investigates
 it against the open web, weighs the evidence, and replies with a verdict and
 a plain-language explanation.
 
-> **Status: architecture & design phase.** The repository currently contains
-> the documentation set and GitHub workflow files — **no application code
-> yet**. See [`docs/architecture-gap-analysis.md`](docs/architecture-gap-analysis.md)
+> **Status: architecture plus Task 13 core.** The repository now includes a
+> pure, fixture-tested weighting and validation core. Telegram handling,
+> evidence collection, persistence, and end-to-end orchestration remain
+> unimplemented; see [`docs/architecture-gap-analysis.md`](docs/architecture-gap-analysis.md)
 > for current-vs-desired.
 
 ## Surfaces
@@ -24,15 +25,15 @@ validation → verdict + explanation.
 
 ## Quick start
 
-Today (documentation phase):
+Run the pure-core tests (Python 3.13, `uv`, and the project dev dependencies):
 
 ```bash
-git clone git@github.com:mamahoos/shayeban.git
-cd shayeban
-open docs/README.md        # start with 00-system-overview.md
+uv run pytest tests/test_weighting.py -v
 ```
 
-Once the scaffold lands (designed in [`docs/deployment.md`](docs/deployment.md)):
+This tests weighting and validation without external services. The complete
+Telegram-to-verdict flow is not available yet. Deployment is still planned in
+[`docs/deployment.md`](docs/deployment.md):
 
 ```bash
 cp .env.example .env       # add BOT_TOKEN / SEARCH_API_KEY

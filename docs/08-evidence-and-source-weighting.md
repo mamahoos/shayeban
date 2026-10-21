@@ -41,11 +41,14 @@ Deliberately not a learned model. Three steps, all deterministic:
 
 Group evidence items that derive from the same origin; each group counts once:
 
-- canonicalize URLs (strip tracking params, fragments, `www`, mobile hosts);
-- near-duplicate content detection on the extracted snippet (hash for exact
-  copies; embedding similarity — already available from clustering — for
-  paraphrases);
-- record `derived_count` on the surviving item (copies are *information about
+- group by registrable domain (case-insensitive, ignoring `www` and ports;
+  subdomains merge). A small built-in suffix list handles common multi-label
+  suffixes such as `co.uk` and `ac.ir`; this is local and makes no network
+  lookup;
+- also group identical case/whitespace-normalized snippets across domains, so
+  exact syndicated copies count once. URL canonicalization and semantic
+  near-duplicate detection for paraphrases are deferred;
+- record `derived_count` on the group (copies are *information about
   virality*, not about truth).
 
 ### 3.2 Per-group weight
@@ -73,13 +76,17 @@ Sum weights per stance (`support` / `contradict`); apply rules:
 - **minimum bars** — e.g. `TRUE`/`FALSE` require ≥ 2 independent groups
   including ≥ 1 `primary`/`journalism`; `forum`-only evidence can yield at
   most `UNCLEAR`;
-- **breaking mode raises the bars** (3+ independent, recency cross-checked)
-  and forces `UNCLEAR — developing` when evidence is thin;
+- **breaking mode raises the independent-group bar** (at least 3 under the
+  initial config) and requires a fresh high-tier group; thin evidence remains
+  `UNCLEAR`, or `NEEDS_REVIEW` when high-tier opposition is unresolved;
 - `strength` (strong / moderate / weak) from how decisively the totals
   separate — a wide margin with thin evidence is still *weak*, not *strong*.
 
-The output is a `VerdictCandidate`, independently guarded by `validation/`
-before the final pass (`04-fsm.md`).
+The Task 13 pure core implements these rules in `weighting/` and `validation/`,
+using thresholds from `config/weights.toml`. The output is a
+`VerdictCandidate`, independently guarded by `validation/` before the final
+pass (`04-fsm.md`). Harness tier lookup and the end-to-end pipeline remain
+unimplemented.
 
 ## 4. Claim repetition / virality (tracked, never weighted into truth)
 

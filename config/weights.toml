@@ -1,0 +1,35 @@
+# SHAYEBAN - weighting & validation thresholds (spec §11, §8, ambiguity #7).
+# Every number below is an [INITIAL] illustrative default: tune via eval, never in code.
+# The SHA-256 of the parsed content is the effective-config hash (config_version).
+
+[tier_weights]            # spec §8.2 base(tier): primary > journalism ≈ factcheck > forum > unknown (=0)
+primary = 1.0
+journalism = 0.8
+factcheck = 0.8
+forum = 0.15              # discovery only; can never satisfy the high-tier floor
+unknown = 0.0             # invariant I12: unknown domains carry no weight
+
+[recency]                 # spec §8.2 recency bands (ages in hours)
+fresh_hours = 24.0
+fresh_factor = 1.0
+aging_hours = 168.0
+aging_factor = 0.7
+stale_factor = 0.3        # non-zero floor
+
+[rollup]                  # spec §8.3
+margin = 0.30                         # required |s-c|/(s+c) for a dominant stance
+min_independent_groups = 2            # TRUE/FALSE floor
+min_independent_groups_breaking = 3   # breaking mode raises the bar (never lowers)
+min_high_tier_groups = 1              # >=1 primary/journalism group on the dominant stance
+strong_margin = 0.60
+strong_min_groups = 4
+moderate_margin = 0.40
+moderate_min_groups = 3               # wide margin + thin evidence stays WEAK
+
+[breaking_mode]           # spec §8.2/§11: used by the caller that decides breaking_mode
+high_velocity_15m = 20
+low_velocity_1h = 5
+
+[budget]                  # spec §8.4 budget state
+max_searches = 6
+max_fetches_per_query = 5

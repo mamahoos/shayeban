@@ -4,9 +4,10 @@ Architecture docs for **Shayeban**, a Telegram-based claim/news fact-checking
 system. The set describes the **desired MVP architecture**, is explicit about
 what exists today, and marks every deliberate deferral.
 
-> Status: documentation phase. The repository contains **no application code
-> yet** — see [`architecture-gap-analysis.md`](architecture-gap-analysis.md)
-> for current-vs-desired.
+> Status: architecture plus Task 13 core. The repository includes a pure,
+> fixture-tested weighting and validation core; the rest of the application
+> is not yet implemented. See
+> [`architecture-gap-analysis.md`](architecture-gap-analysis.md) for current-vs-desired.
 
 ## Reading order
 
