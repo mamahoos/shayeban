@@ -1,0 +1,26 @@
+# Initial, reviewable defaults; not calibrated model-quality guarantees.
+# Source tier comes from the harness registry, never from document text.
+[tiers]
+primary = 1.0
+journalism = 0.8
+factcheck = 0.8
+forum = 0.05
+unknown = 0.0
+
+[weighting]
+fresh_hours = 24.0
+aging_hours = 168.0
+fresh_factor = 1.0
+aging_factor = 0.7
+stale_factor = 0.3
+margin = 0.3
+min_groups = 2
+breaking_min_groups = 3
+min_high_tier_groups = 1
+# Breaking confirmation is distinct from ordinary weight decay (doc 05 §5.3).
+breaking_window_hours = 0.25
+breaking_min_recent_groups = 3
+moderate_margin = 0.4
+strong_margin = 0.6
+moderate_groups = 3
+strong_groups = 4

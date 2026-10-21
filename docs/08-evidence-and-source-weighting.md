@@ -116,6 +116,55 @@ property tests (adding a copy never increases totals; a `forum`-only set never
 yields `TRUE`; breaking mode never lowers a threshold), plus golden cases
 from the eval set (`mlops.md`).
 
+## 7. Implemented pure-core contract (task 13)
+
+`src/shayeban/weighting/` accepts immutable `Evidence` records, parsed
+`WeightingConfig`, and an explicit timezone-aware `now`. `weight_evidence()`
+returns capped groups and derived totals; `rollup()` produces a
+`VerdictCandidate`. `src/shayeban/validation/` independently checks the
+evidence floors and margin and returns permitted truth labels or a separate
+`ValidationStatus.NEEDS_REVIEW` with no model labels. Review is a lifecycle
+outcome, never a truth option sent to Laya. Harness/runner wiring is still
+pending; these functions require neither.
+
+The initial policy is deliberately conservative and reviewable:
+
+- The harness supplies a normalized **site-level domain key** and registered
+  tier. Core normalization handles case, `www.`, and a trailing dot; it does
+  not guess public suffixes or infer trust from text. Distinct reports on one
+  domain contribute at most their strongest report, and count once.
+- Optional `origin_id` links known syndicated copies across domains. Repeated
+  observations share `evidence_id`; copies must preserve their canonical
+  origin's tier, stance, confidence and publication time. Inconsistent copies
+  raise a contract error instead of upgrading or suppressing existing proof.
+  Domain/origin links are transitive and deterministic.
+  Discovering unknown copies or semantic similarity remains the harness's
+  responsibility. A mirror's own metadata must not replace its origin's.
+- Opposing usable evidence within one domain contributes no directional
+  weight. High-tier conflict within or across domains holds the run for review,
+  even if one side has a numerical majority. `primary`/`journalism` satisfy
+  the confirmation floor; `factcheck` retains its configured proof weight but
+  does not silently substitute for that specifically named floor.
+- `config/weights.toml` contains initial tier weights, decay bands, margin,
+  independence/strength floors, and a **separate 15-minute breaking window**.
+  Default breaking confirmation requires three current primary/journalism
+  groups. Missing/future publication times get the nonzero stale weight and
+  cannot satisfy breaking recency. These are initial rules, not calibrated
+  quality claims.
+- Validation takes `BudgetStatus.AVAILABLE` or `EXHAUSTED` from its caller;
+  query counts and per-query fetch accounting remain in the harness. An
+  exhausted budget with thin post-retrieval evidence permits only `UNCLEAR`
+  with an incomplete reason; sufficient evidence remains confirmable. This
+  core does not issue pre-evidence rejection or FSM transitions.
+
+`src/shayeban/settings/weights.py` is the explicit TOML-reading boundary;
+neither pure package reads files, environment, clock, network, or storage.
+Tests in `tests/test_weighting.py` pass config/time/fixtures directly without
+mocks or file I/O; `tests/test_weighting_config.py` separately checks loading.
+Only the M0 TRUE/FALSE/UNCLEAR candidate subset is implemented; additional
+verdict classes, final model pass, provenance persistence, and calibration
+remain with their owning stages.
+
 ---
 
 <sub>**9/21** · [← 07 · Database schema](07-database-schema.md) · [Docs index](README.md) · [Architecture gap analysis →](architecture-gap-analysis.md)</sub>
