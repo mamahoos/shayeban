@@ -98,6 +98,66 @@ The package exposes hooks (`HookRegistry`, usage aggregation) around
 per-pass latency, checkpoint used, and state size. Errors here are retryable
 (`RETRYING` in `04-fsm.md`), never silent.
 
+## 7. Offline runner contract (task 9)
+
+`src/shayeban/decision/runner.py` provides `StatePayload`, `PredictRunner`
+and `FakeRunner`, exported from `shayeban.decision`. The protocol preserves
+the synchronous signature surveyed in `research/laya-predictrunner-port.md`:
+
+```python
+def decide(
+    self, state, schema=None, *, questions=None, return_details=False, **predict_kwargs
+): ...
+```
+
+Detection, stance and verdict are three **uses of this one port**, not three
+new runner methods. This follows the research contract despite issue #20's
+"detection / stance / verdict methods" shorthand. `StatePayload` remains
+`str | dict[str, Any] | list[Any]`; a future typed adapter serializes Pydantic
+state before calling it. Dynamic types are confined to the upstream-shaped
+runner boundary, not a replacement for domain schemas.
+
+```python
+from shayeban.decision import FakeRunner, PredictRunner
+
+runner: PredictRunner = FakeRunner(
+    {
+        "stance": {"type": "choice", "choice": "support", "confidence": 0.9},
+    }
+)
+answer = runner.decide(
+    "fixture evidence",
+    questions={
+        "stance": {
+            "type": "choice",
+            "options": ["support", "contradict", "irrelevant"],
+        }
+    },
+)
+```
+
+Unlike the upstream hard-coded fixture, `FakeRunner(response)` requires an
+explicit response dictionary, allowing one configured fake per pass. It keeps
+the upstream `choice`/`score`/`noul` envelopes unchanged. The response is fixed
+regardless of state, questions or runner options; it does not infer labels,
+validate answers or emulate detailed model output. Configure a detail-shaped
+response explicitly when testing a caller using `return_details=True`.
+
+The fake records the latest call as `seen_state`, `seen_schema`,
+`seen_questions`, `seen_return_details`, and `seen_predict_kwargs`. It copies
+the configured response and each returned answer, and snapshots mutable
+state/questions/options; the schema object is retained by reference. This
+extends the upstream spy while preventing mutation between tests/calls.
+Only copyable fixture payloads are intended here, not live model handles.
+
+`tests/test_decision.py` checks all three pass fixtures, upstream answer
+shapes, payload forms, determinism, mutation isolation and signature
+compatibility. A fresh-interpreter test forbids model-library imports and
+network access while importing and exercising the fake. No real runner,
+weights, typed question factory/asker, final schema vocabulary, pipeline
+wiring or provenance persistence is implemented by this task; schemas and
+real-runner integration belong to issues #21 and #24.
+
 ---
 
 <sub>**7/21** · [← 05 · Harness](05-harness-and-news-ingestion.md) · [Docs index](README.md) · [07 · Database schema →](07-database-schema.md)</sub>
