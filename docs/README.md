@@ -47,6 +47,11 @@ document links to its predecessor, successor, and back to this index.
 | [`devops-roadmap.md`](devops-roadmap.md) | Which tasks a DevOps contributor owns — and what is not justified yet |
 | [`mlops-roadmap.md`](mlops-roadmap.md) | Which tasks an MLOps contributor owns — registry-less on purpose |
 
+## Research notes (outside the numbered reading order)
+
+- [PredictRunner survey](research/laya-predictrunner-port.md): pinned laya-lab runner contract.
+- [Question schemas](research/laya-question-schemas.md): proposed three-pass schemas, confidence semantics and schema versioning (#21).
+
 ## Provenance
 
 | Doc | Origin |
