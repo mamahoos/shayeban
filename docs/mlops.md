@@ -85,6 +85,13 @@ not code constants (`08-evidence-and-source-weighting.md` §3). The config's
 content hash becomes `config_version`, stored per investigation — so "the
 verdict used old thresholds" is a query, not an archaeology project.
 
+Implemented configuration boundary: `load_evidence_settings()` reads all
+four sections of `config/weights.toml` (tiers, weighting, budget, breaking).
+Its immutable result exposes `config_version`, the SHA256 of the effective
+typed settings, including budgets and breaking policy. Comments and numeric
+formatting do not change that identity. Recording it in an investigation or
+eval report still belongs to the future persistence/runner integration.
+
 ## 4. Evaluation runs (the "did it improve?" machinery)
 
 Full design in `evaluation.md`; the MLOps contract is:

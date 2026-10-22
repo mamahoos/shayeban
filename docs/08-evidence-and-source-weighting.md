@@ -157,8 +157,37 @@ The initial policy is deliberately conservative and reviewable:
   with an incomplete reason; sufficient evidence remains confirmable. This
   core does not issue pre-evidence rejection or FSM transitions.
 
-`src/shayeban/settings/weights.py` is the explicit TOML-reading boundary;
-neither pure package reads files, environment, clock, network, or storage.
+`src/shayeban/settings/weights.py` is the explicit TOML-reading boundary.
+`load_evidence_settings(path)` validates the complete shared policy file:
+
+| Section | Settings / owner |
+|---|---|
+| `tiers` | Registry tier weights consumed by the pure scorer |
+| `weighting` | Decay, confirmation/strength floors and short-window recency guard |
+| `budget` | Four total search queries and five fetches **per query**; harness accounting |
+| `breaking` | Detection: 10 distinct docs/15m high threshold, initial 5 docs/1h low threshold; harness |
+| `breaking` | Normal/developing cache TTL: 1440/15 minutes; re-check: 240/1 minutes; orchestration/cache owner |
+
+The low-velocity threshold and four-hour normal re-check are explicit initial
+proposals within the design, to confirm at the team briefing. Shared settings
+belong in this file even though their runtime algorithms live in different
+modules. Loading policy does **not** implement search accounting, breaking
+detection, a cache or a scheduler; those integrations remain pending.
+
+The returned immutable `EvidenceSettings` has `weighting`, `budget` and
+`breaking` views. Pass only `settings.weighting` into pure scoring. Existing
+`load_weights(path)` remains compatible but validates the whole file before
+returning that view. Missing/unknown sections or keys, mistyped numbers and
+inconsistent policy (e.g. a longer developing-story TTL) fail explicitly.
+`settings.config_version` is SHA256 of the complete effective typed policy,
+stable across comments/formatting and sensitive to changes in any section.
+Persisting that identity with investigations remains future wiring.
+
+For the briefing: retrieval owns counters and canonical origin metadata;
+scoring owns only deterministic math; validation returns allowed truth labels
+or holds for review; the orchestrator converts its budget accounting to
+`BudgetStatus`. No model or database is required to exercise those contracts.
+Neither pure package reads files, environment, clock, network, or storage.
 Tests in `tests/test_weighting.py` pass config/time/fixtures directly without
 mocks or file I/O; `tests/test_weighting_config.py` separately checks loading.
 Only the M0 TRUE/FALSE/UNCLEAR candidate subset is implemented; additional

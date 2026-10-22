@@ -1,5 +1,6 @@
 # Initial, reviewable defaults; not calibrated model-quality guarantees.
 # Source tier comes from the harness registry, never from document text.
+# Shared evidence policy: scoring, retrieval budget and breaking-mode settings.
 [tiers]
 primary = 1.0
 journalism = 0.8
@@ -24,3 +25,21 @@ moderate_margin = 0.4
 strong_margin = 0.6
 moderate_groups = 3
 strong_groups = 4
+
+# Harness accounting owns these limits (doc 05 §6 / first milestone task 11).
+# Four total queries: initial allocation is two Persian and two English.
+# The fetch limit is PER QUERY, not the total investigation allowance.
+[budget]
+max_search_queries = 4
+max_fetches_per_query = 5
+
+# Harness/orchestration owns detection, caching and re-check scheduling.
+# Velocity counts distinct documents in the named windows, not user forwards.
+# Doc 05 §5.2–5.3 supplies the initial high bar, TTL and interval ranges.
+[breaking]
+high_velocity_15m = 10
+low_velocity_1h = 5  # Initial hysteresis proposal; confirm/tune at the briefing.
+normal_cache_ttl_minutes = 1440
+breaking_cache_ttl_minutes = 15
+normal_recheck_interval_minutes = 240  # Initial choice within the "hours" design.
+breaking_recheck_interval_minutes = 1
