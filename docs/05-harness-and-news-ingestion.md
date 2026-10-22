@@ -173,6 +173,15 @@ Enforce a **budget per investigation**, not just per user:
 Combine this with per-user daily quotas (tracked in `users.daily_quota_used`,
 see `07-database-schema.md`) to prevent abuse from burning the shared budget.
 
+Shared policy now lives in `config/weights.toml`: `[budget]` holds the total
+query and per-query fetch limits; `[breaking]` holds velocity thresholds,
+normal/developing TTLs and re-check intervals. Read the typed `budget` and
+`breaking` views from `load_evidence_settings()` at the settings boundary
+(`08-evidence-and-source-weighting.md` §7). Scoring still receives only its
+own weighting view and caller-supplied budget/breaking status. Numeric
+accounting, detection, caching and scheduling remain harness/orchestration
+work; configuration completeness does not mean those algorithms are wired.
+
 ---
 
 <sub>**6/21** · [← 04 · FSM](04-fsm.md) · [Docs index](README.md) · [06 · Laya →](06-laya.md)</sub>
